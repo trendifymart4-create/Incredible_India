@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Taj Mahal",
+    "location": "Agra, Uttar Pradesh",
+    "image": "https://images.pexels.com/photos/1583339/pexels-photo-1583339.jpeg",
+    "description": "An immense mausoleum of white marble, built in Agra between 1631 and 1648 by order of the Mughal emperor Shah Jahan in memory of his favourite wife.",
+    "rating": 4.9,
+    "duration": "2-3 hours",
+    "visitors": "8M+ annually",
+    "highlights": ["Ivory-white marble", "Mughal architecture", "UNESCO World Heritage"],
+    "vrAvailable": true,
+    "isActive": true
+  },
+  {
+    "name": "Hawa Mahal",
+    "location": "Jaipur, Rajasthan",
+    "image": "https://images.pexels.com/photos/3581368/pexels-photo-3581368.jpeg",
+    "description": "A palace in Jaipur, India. Made with the red and pink sandstone, the palace sits on the edge of the City Palace, Jaipur, and extends to the Zenana, or women's chambers.",
+    "rating": 4.7,
+    "duration": "1-2 hours",
+    "visitors": "1M+ annually",
+    "highlights": ["953 windows (Jharokhas)", "Pink sandstone", "Royal architecture"],
+    "vrAvailable": true,
+    "isActive": true
+  },
+  {
+    "name": "Kerala Backwaters",
+    "location": "Alleppey, Kerala",
+    "image": "https://images.pexels.com/photos/962464/pexels-photo-962464.jpeg",
+    "description": "A network of interconnected canals, rivers, lakes and inlets, a labyrinthine system formed by more than 900 km of waterways.",
+    "rating": 4.8,
+    "duration": "1-2 days",
+    "visitors": "1.5M+ annually",
+    "highlights": ["Houseboat cruises", "Lush greenery", "Serene waters"],
+    "vrAvailable": true,
+    "isActive": true
+  },
+  {
+    "name": "Goa Beaches",
+    "location": "Goa",
+    "image": "https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg",
+    "description": "Known for its endless beaches, stellar nightlife, eclectic seafood, world-heritage listed architecture.",
+    "rating": 4.6,
+    "duration": "3-5 days",
+    "visitors": "7M+ annually",
+    "highlights": ["Golden sands", "Water sports", "Vibrant nightlife"],
+    "vrAvailable": true,
+    "isActive": true
+  },
+  {
+    "name": "Pangong Lake",
+    "location": "Ladakh",
+    "image": "https://images.pexels.com/photos/1365425/pexels-photo-1365425.jpeg",
+    "description": "An endorheic lake spanning eastern Ladakh and West Tibet situated at an elevation of 4,225 m. It is 134 km long and divided into five sublakes, called Pangong Tso, Tso Nyak, Rum Tso and Nyak Tso.",
+    "rating": 4.9,
+    "duration": "Full day trip",
+    "visitors": "500K+ annually",
+    "highlights": ["High-altitude lake", "Changing colors", "Himalayan backdrop"],
+    "vrAvailable": true,
+    "isActive": true
+  },
+  {
+    "name": "Varanasi Ghats",
+    "location": "Varanasi, Uttar Pradesh",
+    "image": "https://images.pexels.com/photos/1285625/pexels-photo-1285625.jpeg",
+    "description": "The city's life revolves around its seven-kilometre-long sweep of about 80 ghats that line the west bank of the holy Ganga.",
+    "rating": 4.8,
+    "duration": "1-2 days",
+    "visitors": "5M+ annually",
+    "highlights": ["Spiritual ceremonies", "Ganges river", "Ancient city"],
+    "vrAvailable": true,
+    "isActive": true
+  }
+]

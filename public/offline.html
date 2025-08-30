@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incredible India - Offline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #ffecd2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .offline-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .offline-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        .offline-title {
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .offline-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .offline-message {
+            color: #888;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .retry-button {
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(255, 107, 53, 0.4);
+        }
+
+        .retry-button:active {
+            transform: translateY(0);
+        }
+
+        .features {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            background: #ff6b35;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 10px;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon pulse">
+            📱
+        </div>
+        
+        <h1 class="offline-title">You're Offline</h1>
+        <h2 class="offline-subtitle">Incredible India</h2>
+        
+        <p class="offline-message">
+            It looks like you're not connected to the internet. Don't worry, some features are still available!
+        </p>
+        
+        <button class="retry-button" onclick="window.location.reload()">
+            Try Again
+        </button>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">📚</div>
+                <span>Browse cached destinations</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🖼️</div>
+                <span>View downloaded images</span>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📖</div>
+                <span>Read saved articles</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check for connection and auto-retry
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+
+        // Show connection status
+        if (navigator.onLine) {
+            document.querySelector('.offline-message').textContent = 
+                'Connection restored! The page will reload automatically.';
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

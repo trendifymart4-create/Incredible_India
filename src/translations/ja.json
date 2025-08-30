@@ -1,0 +1,70 @@
+{
+  "navigation": {
+    "home": "ホーム",
+    "destinations": "目的地",
+    "vrTours": "VRツアー",
+    "aboutIndia": "インドについて",
+    "contact": "お問い合わせ"
+  },
+  "hero": {
+    "title": "素晴らしいインドを体験",
+    "subtitle": "没入型バーチャルリアリティツアーを通じて、インドの豊かな遺産、多様な文化、息をのむような風景を発見してください。",
+    "cta": "目的地を探索",
+    "stats": {
+      "destinations": "VR目的地",
+      "views": "没入型ビュー",
+      "visitors": "バーチャル訪問者"
+    }
+  },
+  "destinations": {
+    "title": "人気の目的地",
+    "subtitle": "インドの最も象徴的なランドマークと隠れた名所を厳選したセレクションをご覧ください。",
+    "viewVR": "VRで表示"
+  },
+  "featured": {
+    "title": "特集体験",
+    "subtitle": "プレミアム4K VR体験でタージ・マハルの壮大な美しさに没頭してください。"
+  },
+  "testimonials": {
+    "title": "旅行者の声",
+    "subtitle": "これまでにないインド体験をした満足したお客様の声をお聞きください。",
+    "stats": {
+      "travelers": "満足した旅行者",
+      "rating": "平均評価",
+      "recommend": "おすすめする",
+      "countries": "サービス提供国"
+    }
+  },
+  "footer": {
+    "description": "最先端のバーチャルリアリティ技術を通じて、インドの驚異をあなたの指先に届けます。",
+    "quickLinks": "クイックリンク",
+    "destinations": "目的地",
+    "vrTours": "VRツアー",
+    "about": "私たちについて",
+    "contact": "お問い合わせ",
+    "legal": "法的文書",
+    "privacy": "プライバシーポリシー",
+    "terms": "利用規約",
+    "cookies": "クッキーポリシー",
+    "support": "サポート",
+    "languages": "利用可能な言語",
+    "copyright": "© 2023 Incredible India VR. 無断複写・転載を禁じます。"
+  },
+  "reviews": {
+    "addReview": "レビューを追加",
+    "rating": "評価",
+    "title": "タイトル",
+    "titlePlaceholder": "レビューにタイトルを付けてください",
+    "comment": "コメント",
+    "commentPlaceholder": "他の旅行者と体験を共有してください",
+    "submit": "レビューを送信",
+    "submitting": "送信中...",
+    "cancel": "キャンセル",
+    "helpful": "役に立つ",
+    "report": "報告",
+    "title": "レビュー",
+    "noReviews": "まだレビューがありません",
+    "beFirstToReview": "最初に体験を共有してください",
+    "writeReview": "レビューを書く"
+  }
+}

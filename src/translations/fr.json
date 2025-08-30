@@ -1,0 +1,70 @@
+{
+  "navigation": {
+    "home": "Accueil",
+    "destinations": "Destinations",
+    "vrTours": "Visites VR",
+    "aboutIndia": "À propos de l'Inde",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "Découvrez l'Inde Incroyable",
+    "subtitle": "Découvrez le riche patrimoine, la culture diverse et les paysages à couper le souffle de l'Inde grâce à des visites virtuelles immersives.",
+    "cta": "Explorer les destinations",
+    "stats": {
+      "destinations": "Destinations VR",
+      "views": "Vues immersives",
+      "visitors": "Visiteurs virtuels"
+    }
+  },
+  "destinations": {
+    "title": "Destinations populaires",
+    "subtitle": "Explorez notre sélection personnalisée des monuments emblématiques de l'Inde et de ses trésors cachés.",
+    "viewVR": "Voir en VR"
+  },
+  "featured": {
+    "title": "Expérience à la une",
+    "subtitle": "Immergez-vous dans la beauté majestueuse du Taj Mahal avec notre expérience VR 4K premium."
+  },
+  "testimonials": {
+    "title": "Ce que disent les voyageurs",
+    "subtitle": "Écoutez nos clients satisfaits qui ont vécu l'Inde comme jamais auparavant.",
+    "stats": {
+      "travelers": "Voyageurs satisfaits",
+      "rating": "Note moyenne",
+      "recommend": "Recommanderaient",
+      "countries": "Pays desservis"
+    }
+  },
+  "footer": {
+    "description": "Apporter les merveilles de l'Inde à portée de main grâce à la technologie de réalité virtuelle de pointe.",
+    "quickLinks": "Liens rapides",
+    "destinations": "Destinations",
+    "vrTours": "Visites VR",
+    "about": "À propos de nous",
+    "contact": "Contact",
+    "legal": "Légal",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "cookies": "Politique de cookies",
+    "support": "Support",
+    "languages": "Langues disponibles",
+    "copyright": "© 2023 Inde VR Incroyable. Tous droits réservés."
+  },
+  "reviews": {
+    "addReview": "Ajouter votre avis",
+    "rating": "Note",
+    "title": "Titre",
+    "titlePlaceholder": "Donnez un titre à votre avis",
+    "comment": "Commentaire",
+    "commentPlaceholder": "Partagez votre expérience avec d'autres voyageurs",
+    "submit": "Soumettre l'avis",
+    "submitting": "Soumission...",
+    "cancel": "Annuler",
+    "helpful": "Utile",
+    "report": "Signaler",
+    "title": "Avis",
+    "noReviews": "Aucun avis pour le moment",
+    "beFirstToReview": "Soyez le premier à partager votre expérience",
+    "writeReview": "Écrire un avis"
+  }
+}

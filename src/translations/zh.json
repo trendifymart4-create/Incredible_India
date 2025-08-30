@@ -1,0 +1,70 @@
+{
+  "navigation": {
+    "home": "首页",
+    "destinations": "目的地",
+    "vrTours": "VR游览",
+    "aboutIndia": "关于印度",
+    "contact": "联系我们"
+  },
+  "hero": {
+    "title": "体验神奇的印度",
+    "subtitle": "通过沉浸式虚拟现实游览，发现印度丰富的遗产、多元的文化和令人叹为观止的景观。",
+    "cta": "探索目的地",
+    "stats": {
+      "destinations": "VR目的地",
+      "views": "沉浸式视图",
+      "visitors": "虚拟访客"
+    }
+  },
+ "destinations": {
+    "title": "热门目的地",
+    "subtitle": "探索我们精心挑选的印度最具标志性的地标和隐藏的瑰宝。",
+    "viewVR": "VR查看"
+  },
+ "featured": {
+    "title": "特色体验",
+    "subtitle": "通过我们的高级4K VR体验，沉浸在泰姬陵的宏伟美景中。"
+  },
+  "testimonials": {
+    "title": "旅客评价",
+    "subtitle": "听听我们满意的客户如何以前所未有的方式体验印度。",
+    "stats": {
+      "travelers": "满意旅客",
+      "rating": "平均评分",
+      "recommend": "会推荐",
+      "countries": "服务国家"
+    }
+  },
+  "footer": {
+    "description": "通过尖端的虚拟现实技术，将印度的奇迹带到您的指尖。",
+    "quickLinks": "快速链接",
+    "destinations": "目的地",
+    "vrTours": "VR游览",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "legal": "法律条款",
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "cookies": "Cookie政策",
+    "support": "支持",
+    "languages": "可用语言",
+    "copyright": "© 2023 神奇印度VR。保留所有权利。"
+  },
+  "reviews": {
+    "addReview": "添加评论",
+    "rating": "评分",
+    "title": "标题",
+    "titlePlaceholder": "为您的评论添加标题",
+    "comment": "评论",
+    "commentPlaceholder": "与其他旅行者分享您的体验",
+    "submit": "提交评论",
+    "submitting": "提交中...",
+    "cancel": "取消",
+    "helpful": "有帮助",
+    "report": "举报",
+    "title": "评论",
+    "noReviews": "暂无评论",
+    "beFirstToReview": "成为第一个分享体验的人",
+    "writeReview": "写评论"
+  }
+}

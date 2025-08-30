@@ -1,0 +1,78 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.admin == true;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && 
+             request.auth.uid == userId;
+    }
+    
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    function isValidSize() {
+      return request.resource.size < 5 * 1024 * 1024; // 5MB limit
+    }
+    
+    // User avatars
+    match /avatars/{userId}/{allPaths=**} {
+      // Users can read their own avatars, anyone can read if public
+      allow read: if true;
+      // Users can upload their own avatars
+      allow write: if isOwner(userId) && 
+                      isValidImage() && 
+                      isValidSize();
+      // Admins can manage any avatar
+      allow write: if isAdmin();
+    }
+    
+    // Destination images
+    match /destinations/{destinationId}/{allPaths=**} {
+      // Anyone can read destination images
+      allow read: if true;
+      // Only admins can upload destination images
+      allow write: if isAdmin() && 
+                      isValidImage() && 
+                      isValidSize();
+    }
+    
+    // General images
+    match /images/{category}/{allPaths=**} {
+      // Anyone can read general images
+      allow read: if true;
+      // Authenticated users can upload general images
+      allow write: if isAuthenticated() && 
+                      isValidImage() && 
+                      isValidSize();
+      // Admins have full access
+      allow write: if isAdmin();
+    }
+    
+    // Temporary uploads (for processing)
+    match /temp/{userId}/{allPaths=**} {
+      // Users can manage their own temp files
+      allow read, write: if isOwner(userId) && 
+                            isValidImage() && 
+                            isValidSize();
+      
+      // Admins have full access
+      allow read, write: if isAdmin();
+    }
+    
+    // Admin uploads
+    match /admin/{allPaths=**} {
+      // Only admins can access admin uploads
+      allow read, write: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.admin == true;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && 
+             request.auth.uid == userId;
+    }
+    
+    function isOwnerOrAdmin(userId) {
+      return isOwner(userId) || isAdmin();
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own profile, admins can read all
+      allow read: if isOwnerOrAdmin(userId);
+      
+      // Users can create their own profile during signup
+      allow create: if isAuthenticated() && 
+                       request.auth.uid == userId &&
+                       request.resource.data.uid == userId;
+      
+      // Users can update their own profile, admins can update any
+      allow update: if isOwnerOrAdmin(userId);
+      
+      // Only admins can delete user accounts
+      allow delete: if isAdmin();
+    }
+    
+    // Destinations collection
+    match /destinations/{destinationId} {
+      // Anyone can read active destinations
+      allow read: if resource.data.isActive == true || isAdmin();
+      
+      // Only admins can create, update, or delete destinations
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Videos collection
+    match /videos/{videoId} {
+      // Anyone can read active videos
+      allow read: if resource.data.isActive == true || isAdmin() || resource.data.isActive == null;
+      
+      // Only admins can create, update, or delete videos
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Reviews collection
+    match /reviews/{reviewId} {
+      // Anyone can read non-hidden reviews
+      allow read: if resource.data.isHidden == false || isAdmin();
+      
+      // Users can create reviews for themselves
+      allow create: if isAuthenticated() && 
+                       request.auth.uid == request.resource.data.userId;
+      
+      // Users can update their own reviews, admins can update any
+      allow update: if isOwnerOrAdmin(resource.data.userId);
+      
+      // Users can delete their own reviews, admins can delete any
+      allow delete: if isOwnerOrAdmin(resource.data.userId);
+    }
+    
+    // Transactions collection
+    match /transactions/{transactionId} {
+      // Users can read their own transactions, admins can read all
+      allow read: if isOwnerOrAdmin(resource.data.userId);
+      
+      // Only authenticated users can create transactions for themselves
+      allow create: if isAuthenticated() && 
+                       request.auth.uid == request.resource.data.userId;
+      
+      // Only admins can update transactions (for status changes)
+      allow update: if isAdmin();
+      
+      // Only admins can delete transactions
+      allow delete: if isAdmin();
+    }
+    
+    // Configuration collection (for featured video, etc.)
+    match /config/{configId} {
+      // Anyone can read config
+      allow read: if true;
+      
+      // Only admins can update config
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Analytics collection (for storing analytics data)
+    match /analytics/{analyticsId} {
+      // Only admins can read analytics
+      allow read: if isAdmin();
+      
+      // System can write analytics data
+      allow create, update: if true;
+      
+      // Only admins can delete analytics
+      allow delete: if isAdmin();
+    }
+  }
+}

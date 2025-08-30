@@ -1,0 +1,12 @@
+<!-- This is a placeholder for the fallback video file -->
+<!-- In a real implementation, you would place an actual MP4 file here -->
+<!-- For now, we'll create a simple HTML file that explains the fallback -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Fallback</title>
+</head>
+<body>
+    <p>This is a placeholder for the fallback video. In production, replace this with an actual MP4 video file.</p>
+</body>
+</html>

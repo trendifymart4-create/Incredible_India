@@ -1,0 +1,70 @@
+{
+  "navigation": {
+    "home": "Home",
+    "destinations": "Destinations",
+    "vrTours": "VR Tours",
+    "aboutIndia": "About India",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "Experience Incredible India",
+    "subtitle": "Discover the rich heritage, diverse culture, and breathtaking landscapes of India through immersive virtual reality tours.",
+    "cta": "Explore Destinations",
+    "stats": {
+      "destinations": "VR Destinations",
+      "views": "Immersive Views",
+      "visitors": "Virtual Visitors"
+    }
+  },
+  "destinations": {
+    "title": "Popular Destinations",
+    "subtitle": "Explore our handpicked selection of India's most iconic landmarks and hidden gems.",
+    "viewVR": "View in VR"
+  },
+  "featured": {
+    "title": "Featured Experience",
+    "subtitle": "Immerse yourself in the majestic beauty of the Taj Mahal with our premium 4K VR experience."
+  },
+  "testimonials": {
+    "title": "What Travelers Say",
+    "subtitle": "Hear from our satisfied customers who have experienced India like never before.",
+    "stats": {
+      "travelers": "Happy Travelers",
+      "rating": "Average Rating",
+      "recommend": "Would Recommend",
+      "countries": "Countries Served"
+    }
+  },
+  "footer": {
+    "description": "Bringing the wonders of India to your fingertips through cutting-edge virtual reality technology.",
+    "quickLinks": "Quick Links",
+    "destinations": "Destinations",
+    "vrTours": "VR Tours",
+    "about": "About Us",
+    "contact": "Contact",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy",
+    "support": "Support",
+    "languages": "Available Languages",
+    "copyright": "© 2023 Incredible India VR. All rights reserved."
+  },
+  "reviews": {
+    "addReview": "Add Your Review",
+    "rating": "Rating",
+    "title": "Title",
+    "titlePlaceholder": "Give your review a title",
+    "comment": "Comment",
+    "commentPlaceholder": "Share your experience with other travelers",
+    "submit": "Submit Review",
+    "submitting": "Submitting...",
+    "cancel": "Cancel",
+    "helpful": "Helpful",
+    "report": "Report",
+    "title": "Reviews",
+    "noReviews": "No reviews yet",
+    "beFirstToReview": "Be the first to share your experience",
+    "writeReview": "Write a Review"
+  }
+}
