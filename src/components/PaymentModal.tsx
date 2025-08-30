@@ -102,9 +102,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           userEmail: currentUser.email || '',
           amount: amount,
           currency: currency,
-          contentId: destination.id,
-          contentType: 'destination',
-          contentTitle: destination.name,
+          contentId: 'premium_subscription',
+          contentType: 'premium',
+          contentTitle: `Premium Subscription - ${destination.name}`,
           paymentMethod: selectedPaymentMethod,
         });
         setTransactionId(transactionIdToUse);
@@ -140,7 +140,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Secure Payment</h2>
-            <p className="text-sm text-gray-600">Unlock {destination.name} VR Experience</p>
+            <p className="text-sm text-gray-600">Unlock Premium VR Experience</p>
           </div>
           <button
             onClick={onClose}
@@ -156,7 +156,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <h3 className="font-medium text-gray-900 mb-2">Order Summary</h3>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">VR Experience Access</span>
+              <span className="text-gray-600">Premium VR Access</span>
               <span className="font-medium">
                 {currentCurrency.symbol}{price} {currency}
               </span>

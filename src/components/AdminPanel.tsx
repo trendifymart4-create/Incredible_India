@@ -1,10 +1,11 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { Plus, Edit, Trash2, Eye, EyeOff, X, Video as VideoIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, X, Video as VideoIcon, Bell, Send } from 'lucide-react';
 
 // Lazy load components that might not be immediately needed
 const SkeletonCard = lazy(() => import('./SkeletonLoader').then(module => ({ default: module.SkeletonCard })));
 const SkeletonText = lazy(() => import('./SkeletonLoader').then(module => ({ default: module.SkeletonText })));
 import { useAuth } from '../context/AuthContext';
+import { notificationService } from '../services/notificationService';
 import {
   subscribeToDestinations,
   createDestination,
@@ -35,7 +36,7 @@ interface AdminPanelProps {
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'destinations' | 'videos' | 'featured' | 'users' | 'revenue' | 'paymentGateways'>('destinations');
+  const [activeTab, setActiveTab] = useState<'destinations' | 'videos' | 'featured' | 'users' | 'revenue' | 'paymentGateways' | 'notifications'>('destinations');
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [featuredVideo, setFeaturedVideoState] = useState<FeaturedVideoConfig | null>(null);
@@ -44,8 +45,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
   const [paymentGatewayConfig, setPaymentGatewayConfigState] = useState<PaymentGatewayConfig | null>(null);
   const [editingDestination, setEditingDestination] = useState<Destination | null>(null);
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
- const [showAddDestination, setShowAddDestination] = useState(false);
+  const [showAddDestination, setShowAddDestination] = useState(false);
   const [showAddVideo, setShowAddVideo] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { currentUser } = useAuth();
 
@@ -208,6 +210,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
           const result = await uploadDestinationImage(imageFile, destinationId);
           await updateDestination(destinationId, { image: result.url, updatedBy: currentUser.uid });
         }
+        
+        // Trigger notification for new destination
+        try {
+          const newDestination = {
+            id: destinationId,
+            name: data.name,
+            location: data.location,
+            image: imageFile ? (await uploadDestinationImage(imageFile, destinationId)).url : (data.image || '/placeholder-destination.jpg')
+          };
+          await notificationService.triggerDestinationNotification(newDestination, currentUser.uid);
+          console.log('Destination notification sent successfully');
+        } catch (notifError) {
+          console.error('Error sending destination notification:', notifError);
+          // Don't fail the entire operation if notification fails
+        }
+        
         setShowAddDestination(false);
       }
     } catch (error) {
@@ -252,10 +270,27 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
         });
         setEditingVideo(null);
       } else {
-        await createVideo({
+        const videoId = await createVideo({
           ...data,
           createdBy: currentUser.uid,
         } as any);
+        
+        // Trigger notification for new VR tour
+        try {
+          const destination = destinations.find(d => d.id === data.destinationId);
+          const destinationName = destination?.name || 'Unknown Destination';
+          const newVideo = {
+            id: videoId,
+            title: data.title,
+            thumbnailUrl: data.thumbnailUrl || `https://img.youtube.com/vi/${data.youtubeId}/maxresdefault.jpg`
+          };
+          await notificationService.triggerVRTourNotification(newVideo, destinationName, currentUser.uid);
+          console.log('VR Tour notification sent successfully');
+        } catch (notifError) {
+          console.error('Error sending VR tour notification:', notifError);
+          // Don't fail the entire operation if notification fails
+        }
+        
         setShowAddVideo(false);
       }
     } catch (error) {
@@ -377,6 +412,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
           >
             Payment Gateways
           </button>
+          <button
+            onClick={() => setActiveTab('notifications')}
+            className={`px-6 py-3 font-medium transition-colors ${
+              activeTab === 'notifications'
+                ? 'text-orange-600 border-b-2 border-orange-600'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <div className="flex items-center space-x-2">
+              <Bell className="w-4 h-4" />
+              <span>Notifications</span>
+            </div>
+          </button>
         </div>
 
         {/* Content */}
@@ -439,6 +487,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
                     } catch (error) {
                       console.error('Error saving payment gateway config:', error);
                       alert('Failed to save payment gateway configuration.');
+                    }
+                  }}
+                />
+              )}
+              
+              {activeTab === 'notifications' && (
+                <NotificationsTab
+                  onSendAnnouncement={async (announcement) => {
+                    if (!currentUser) {
+                      alert('You must be logged in to send announcements.');
+                      return;
+                    }
+
+                    try {
+                      await notificationService.triggerCustomAnnouncement(announcement, currentUser.uid);
+                      alert('Announcement sent successfully!');
+                    } catch (error) {
+                      console.error('Error sending announcement:', error);
+                      alert('Failed to send announcement.');
                     }
                   }}
                 />
@@ -1285,5 +1352,199 @@ const UsersTab: React.FC<{ users: UserProfile[] }> = ({ users }) => (
       </div>
     );
   };
+
+// Notifications Tab Component
+const NotificationsTab: React.FC<{
+  onSendAnnouncement: (announcement: any) => Promise<void>;
+}> = ({ onSendAnnouncement }) => {
+  const [formData, setFormData] = useState({
+    title: '',
+    message: '',
+    category: 'new_content' as const,
+    priority: 'medium' as const,
+    targetAudience: 'all' as const,
+    expiresIn: '7' // days
+  });
+  const [isSending, setIsSending] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title.trim() || !formData.message.trim()) {
+      alert('Please fill in title and message.');
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + parseInt(formData.expiresIn));
+
+      await onSendAnnouncement({
+        title: formData.title,
+        message: formData.message,
+        category: formData.category,
+        priority: formData.priority,
+        targetAudience: formData.targetAudience,
+        expiresAt: expiresAt,
+        metadata: {
+          imageUrl: '/icon-192x192.png' // Default notification icon
+        }
+      });
+
+      // Reset form
+      setFormData({
+        title: '',
+        message: '',
+        category: 'new_content',
+        priority: 'medium',
+        targetAudience: 'all',
+        expiresIn: '7'
+      });
+    } catch (error) {
+      console.error('Error sending announcement:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-semibold">Notification Management</h3>
+        <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <Bell className="w-4 h-4" />
+          <span>Send custom announcements to users</span>
+        </div>
+      </div>
+
+      {/* Send Custom Notification Form */}
+      <div className="bg-gray-50 rounded-lg p-6">
+        <h4 className="text-lg font-semibold mb-4 flex items-center space-x-2">
+          <Send className="w-5 h-5 text-orange-500" />
+          <span>Send Custom Announcement</span>
+        </h4>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Announcement title..."
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="new_content">New Content</option>
+                <option value="update">Update</option>
+                <option value="promotion">Promotion</option>
+                <option value="maintenance">Maintenance</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+            <textarea
+              value={formData.message}
+              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+              placeholder="Your announcement message..."
+              rows={4}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+              <select
+                value={formData.priority}
+                onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Target Audience</label>
+              <select
+                value={formData.targetAudience}
+                onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value as any })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="all">All Users</option>
+                <option value="premium">Premium Users Only</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Expires In (days)</label>
+              <select
+                value={formData.expiresIn}
+                onChange={(e) => setFormData({ ...formData, expiresIn: e.target.value })}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="1">1 Day</option>
+                <option value="3">3 Days</option>
+                <option value="7">7 Days</option>
+                <option value="14">14 Days</option>
+                <option value="30">30 Days</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSending}
+            className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+          >
+            <Send className="w-4 h-4" />
+            <span>{isSending ? 'Sending...' : 'Send Announcement'}</span>
+          </button>
+        </form>
+      </div>
+
+      {/* Notification Statistics */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h4 className="text-lg font-semibold mb-4">Notification Statistics</h4>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <div className="text-2xl font-bold text-blue-600">--</div>
+            <div className="text-sm text-blue-600">Total Sent</div>
+          </div>
+          <div className="text-center p-4 bg-green-50 rounded-lg">
+            <div className="text-2xl font-bold text-green-600">--</div>
+            <div className="text-sm text-green-600">Delivered</div>
+          </div>
+          <div className="text-center p-4 bg-yellow-50 rounded-lg">
+            <div className="text-2xl font-bold text-yellow-600">--</div>
+            <div className="text-sm text-yellow-600">Read</div>
+          </div>
+          <div className="text-center p-4 bg-purple-50 rounded-lg">
+            <div className="text-2xl font-bold text-purple-600">--</div>
+            <div className="text-sm text-purple-600">Clicked</div>
+          </div>
+        </div>
+        <div className="mt-4 text-sm text-gray-600">
+          <p>• Automatic notifications are sent when you add new destinations or VR tours</p>
+          <p>• Users receive real-time notifications and push messages</p>
+          <p>• Notification analytics are updated in real-time</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default AdminPanel;

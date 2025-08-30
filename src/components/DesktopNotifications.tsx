@@ -3,31 +3,29 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
   Bell, 
-  Settings, 
-  User, 
-  LogOut, 
   Check, 
   Trash2, 
   ExternalLink,
-  Calendar,
   MapPin,
   Play,
   Info,
   AlertCircle,
   Gift,
-  Wrench
+  Wrench,
+  Clock,
+  Filter
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { notificationService } from '../../services/notificationService';
-import { Notification } from '../../types/notifications';
+import { useAuth } from '../context/AuthContext';
+import { notificationService } from '../services/notificationService';
+import { Notification } from '../types/notifications';
 import { format } from 'date-fns';
 
-interface MobileNotificationsProps {
+interface DesktopNotificationsProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const MobileNotifications: React.FC<MobileNotificationsProps> = ({
+const DesktopNotifications: React.FC<DesktopNotificationsProps> = ({
   isOpen,
   onClose,
 }) => {
@@ -54,12 +52,6 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
         setIsLoading(false);
       }
     );
-
-    // Handle errors
-    const errorHandler = (error: Error) => {
-      setError(error.message);
-      setIsLoading(false);
-    };
 
     return () => {
       unsubscribe();
@@ -183,20 +175,20 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
         onClick={onClose}
       >
         <motion.div
-          initial={{ x: '100%' }}
-          animate={{ x: 0 }}
-          exit={{ x: '100%' }}
+          initial={{ opacity: 0, scale: 0.95, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: -20 }}
           transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-          className="absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl overflow-hidden flex flex-col"
+          className="absolute top-16 right-4 w-96 max-h-[80vh] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-4">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2">
                 <Bell className="w-5 h-5" />
                 <h2 className="text-lg font-semibold">Notifications</h2>
@@ -214,45 +206,50 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
               </button>
             </div>
             
-            {/* Filter Tabs */}
-            <div className="flex space-x-2">
-              <button
-                onClick={() => setFilter('all')}
-                className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                  filter === 'all'
-                    ? 'bg-white/20 text-white'
-                    : 'text-orange-100 hover:text-white'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilter('unread')}
-                className={`px-3 py-1 text-sm rounded-full transition-colors ${
-                  filter === 'unread'
-                    ? 'bg-white/20 text-white'
-                    : 'text-orange-100 hover:text-white'
-                }`}
-              >
-                Unread ({unreadCount})
-              </button>
+            {/* Filter Tabs and Actions */}
+            <div className="flex items-center justify-between">
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setFilter('all')}
+                  className={`px-3 py-1 text-sm rounded-full transition-colors flex items-center space-x-1 ${
+                    filter === 'all'
+                      ? 'bg-white/20 text-white'
+                      : 'text-orange-100 hover:text-white'
+                  }`}
+                >
+                  <Filter className="w-3 h-3" />
+                  <span>All</span>
+                </button>
+                <button
+                  onClick={() => setFilter('unread')}
+                  className={`px-3 py-1 text-sm rounded-full transition-colors ${
+                    filter === 'unread'
+                      ? 'bg-white/20 text-white'
+                      : 'text-orange-100 hover:text-white'
+                  }`}
+                >
+                  Unread ({unreadCount})
+                </button>
+              </div>
+              
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllAsRead}
-                  className="px-3 py-1 text-sm text-orange-100 hover:text-white transition-colors"
+                  className="px-3 py-1 text-sm text-orange-100 hover:text-white transition-colors flex items-center space-x-1"
                 >
-                  Mark all read
+                  <Check className="w-3 h-3" />
+                  <span>Mark all read</span>
                 </button>
               )}
             </div>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto max-h-96">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                <span className="ml-3 text-gray-600">Loading notifications...</span>
+                <span className="ml-3 text-gray-600">Loading...</span>
               </div>
             ) : error ? (
               <div className="flex items-center justify-center py-8 px-4">
@@ -286,12 +283,12 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
                 {filteredNotifications.map((notification, index) => (
                   <motion.div
                     key={notification.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
                     className={`relative border-l-4 ${getPriorityColor(notification.priority)} ${
                       !notification.isRead ? 'bg-blue-50/50' : ''
-                    }`}
+                    } hover:bg-gray-50 transition-colors`}
                   >
                     <div className="p-4">
                       <div className="flex items-start space-x-3">
@@ -312,9 +309,21 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
                               }`}>
                                 {notification.message}
                               </p>
-                              <p className="mt-2 text-xs text-gray-400">
-                                {formatNotificationTime(notification.createdAt)}
-                              </p>
+                              <div className="flex items-center space-x-3 mt-2">
+                                <div className="flex items-center space-x-1 text-xs text-gray-400">
+                                  <Clock className="w-3 h-3" />
+                                  <span>{formatNotificationTime(notification.createdAt)}</span>
+                                </div>
+                                {notification.priority !== 'low' && (
+                                  <span className={`text-xs px-2 py-1 rounded-full ${
+                                    notification.priority === 'urgent' ? 'bg-red-100 text-red-700' :
+                                    notification.priority === 'high' ? 'bg-orange-100 text-orange-700' :
+                                    'bg-blue-100 text-blue-700'
+                                  }`}>
+                                    {notification.priority}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             
                             {/* Action Buttons */}
@@ -322,7 +331,7 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
                               {!notification.isRead && (
                                 <button
                                   onClick={() => handleMarkAsRead(notification.id)}
-                                  className="p-1 text-gray-400 hover:text-green-500 transition-colors"
+                                  className="p-1 text-gray-400 hover:text-green-500 transition-colors rounded"
                                   title="Mark as read"
                                 >
                                   <Check className="w-4 h-4" />
@@ -332,7 +341,7 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
                               {notification.metadata?.actionUrl && (
                                 <button
                                   onClick={() => handleNotificationClick(notification)}
-                                  className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                                  className="p-1 text-gray-400 hover:text-blue-500 transition-colors rounded"
                                   title="Open"
                                 >
                                   <ExternalLink className="w-4 h-4" />
@@ -341,7 +350,7 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
                               
                               <button
                                 onClick={() => handleDismissNotification(notification.id)}
-                                className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                                className="p-1 text-gray-400 hover:text-red-500 transition-colors rounded"
                                 title="Dismiss"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -353,7 +362,7 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
                           {notification.metadata?.actionUrl && (
                             <button
                               onClick={() => handleNotificationClick(notification)}
-                              className="mt-2 text-xs text-orange-500 hover:text-orange-600 font-medium"
+                              className="mt-3 text-xs text-orange-500 hover:text-orange-600 font-medium bg-orange-50 hover:bg-orange-100 px-3 py-1 rounded-full transition-colors"
                             >
                               {notification.type === 'destination' && 'View Destination'}
                               {notification.type === 'vr_tour' && 'Start VR Tour'}
@@ -376,7 +385,7 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
               <div className="flex items-center justify-between text-sm text-gray-600">
                 <span>{filteredNotifications.length} notifications</span>
                 {currentUser && (
-                  <span>Logged in as {currentUser.email}</span>
+                  <span className="text-xs">Real-time updates</span>
                 )}
               </div>
             </div>
@@ -387,4 +396,4 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
   );
 };
 
-export default MobileNotifications;
+export default DesktopNotifications;

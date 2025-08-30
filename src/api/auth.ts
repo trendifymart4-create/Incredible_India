@@ -9,11 +9,15 @@ import {
   UserCredential,
   GoogleAuthProvider,
   FacebookAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  OAuthProvider
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { auth, db, functions } from '../firebase';
+import { isMobileDevice, isIOS, isAndroid } from '../utils/deviceDetection';
 
 export interface UserProfile {
   uid: string;
@@ -42,9 +46,9 @@ export interface SignInData {
 }
 
 // Sign up new user
-export const signUpUser = async (userData: SignUpData): Promise<UserProfile> => {
+export const signUpUser = async (email: string, password: string, userData: Omit<SignUpData, 'email' | 'password'>): Promise<UserProfile> => {
   try {
-    const { email, password, firstName, lastName, country } = userData;
+    const { firstName, lastName, country } = userData;
     
     // Create user account
     const userCredential: UserCredential = await createUserWithEmailAndPassword(
@@ -83,10 +87,8 @@ export const signUpUser = async (userData: SignUpData): Promise<UserProfile> => 
 };
 
 // Sign in user
-export const signInUser = async (credentials: SignInData): Promise<UserProfile> => {
+export const signInUser = async (email: string, password: string): Promise<UserProfile> => {
   try {
-    const { email, password } = credentials;
-    
     const userCredential: UserCredential = await signInWithEmailAndPassword(
       auth,
       email,
@@ -157,9 +159,9 @@ export const checkAdminStatus = async (user: User): Promise<boolean> => {
 };
 
 // Admin login with custom claims verification
-export const adminSignIn = async (credentials: SignInData): Promise<UserProfile> => {
+export const adminSignIn = async (email: string, password: string): Promise<UserProfile> => {
   try {
-    const userProfile = await signInUser(credentials);
+    const userProfile = await signInUser(email, password);
     const user = auth.currentUser;
     
     if (!user) {
@@ -199,81 +201,149 @@ export const removeAdminRole = async (email: string): Promise<void> => {
   }
 };
 
-// Sign in with Google
-export const signInWithGoogle = async (): Promise<UserProfile> => {
+// Enhanced mobile-specific Google sign-in
+export const signInWithGoogleMobile = async (): Promise<UserProfile> => {
   try {
     const provider = new GoogleAuthProvider();
-    const userCredential: UserCredential = await signInWithPopup(auth, provider);
-    const user = userCredential.user;
     
-    // Check if user profile already exists
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    // Configure provider for mobile
+    provider.addScope('email');
+    provider.addScope('profile');
     
-    if (!userDoc.exists()) {
-      // Create new user profile for Google Sign-In
-      const nameParts = user.displayName?.split(' ') || [];
-      const firstName = nameParts[0] || 'User';
-      const lastName = nameParts.slice(1).join(' ') || '';
+    // For mobile devices, use redirect method to trigger native auth
+    if (isMobileDevice()) {
+      // Use redirect for mobile to trigger native app authentication
+      await signInWithRedirect(auth, provider);
       
-      const userProfile: UserProfile = {
-        uid: user.uid,
-        email: user.email!,
-        firstName,
-        lastName,
-        country: '',
-        joinDate: serverTimestamp(),
-        subscription: 'free',
-        isAdmin: false,
-        purchasedContent: [],
-        avatarUrl: user.photoURL || undefined
-      };
-      
-      await setDoc(doc(db, 'users', user.uid), userProfile);
-      return userProfile;
+      // The result will be handled by getRedirectResult in a separate function
+      return new Promise((resolve, reject) => {
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+          if (user) {
+            unsubscribe();
+            try {
+              const profile = await handleSocialAuthUser(user);
+              resolve(profile);
+            } catch (error) {
+              reject(error);
+            }
+          }
+        });
+      });
     } else {
-      // Return existing user profile
-      return userDoc.data() as UserProfile;
+      // Use popup for desktop
+      return await signInWithGoogle();
     }
   } catch (error: any) {
     throw new Error(error.message || 'Failed to sign in with Google');
   }
 };
 
-// Sign in with Facebook
+// Enhanced mobile-specific Facebook sign-in
+export const signInWithFacebookMobile = async (): Promise<UserProfile> => {
+  try {
+    const provider = new FacebookAuthProvider();
+    
+    // Configure provider for mobile
+    provider.addScope('email');
+    provider.addScope('public_profile');
+    
+    // For mobile devices, use redirect method to trigger native auth
+    if (isMobileDevice()) {
+      // Use redirect for mobile to trigger native app authentication
+      await signInWithRedirect(auth, provider);
+      
+      // The result will be handled by getRedirectResult in a separate function
+      return new Promise((resolve, reject) => {
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+          if (user) {
+            unsubscribe();
+            try {
+              const profile = await handleSocialAuthUser(user);
+              resolve(profile);
+            } catch (error) {
+              reject(error);
+            }
+          }
+        });
+      });
+    } else {
+      // Use popup for desktop
+      return await signInWithFacebook();
+    }
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to sign in with Facebook');
+  }
+};
+
+// Handle redirect result for mobile authentication
+export const handleAuthRedirectResult = async (): Promise<UserProfile | null> => {
+  try {
+    const result = await getRedirectResult(auth);
+    
+    if (result && result.user) {
+      return await handleSocialAuthUser(result.user);
+    }
+    
+    return null;
+  } catch (error: any) {
+    console.error('Error handling auth redirect:', error);
+    throw new Error(error.message || 'Failed to handle authentication redirect');
+  }
+};
+
+// Helper function to handle social auth user creation/retrieval (exported)
+export const handleSocialAuthUser = async (user: User): Promise<UserProfile> => {
+  // Check if user profile already exists
+  const userDoc = await getDoc(doc(db, 'users', user.uid));
+  
+  if (!userDoc.exists()) {
+    // Create new user profile for social sign-in
+    const nameParts = user.displayName?.split(' ') || [];
+    const firstName = nameParts[0] || 'User';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
+    const userProfile: UserProfile = {
+      uid: user.uid,
+      email: user.email!,
+      firstName,
+      lastName,
+      country: '',
+      joinDate: serverTimestamp(),
+      subscription: 'free',
+      isAdmin: false,
+      purchasedContent: [],
+      avatarUrl: user.photoURL || undefined
+    };
+    
+    await setDoc(doc(db, 'users', user.uid), userProfile);
+    return userProfile;
+  } else {
+    // Return existing user profile
+    return userDoc.data() as UserProfile;
+  }
+};
+
+// Original desktop Google sign-in (using popup)
+export const signInWithGoogle = async (): Promise<UserProfile> => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const userCredential: UserCredential = await signInWithPopup(auth, provider);
+    const user = userCredential.user;
+    
+    return await handleSocialAuthUser(user);
+  } catch (error: any) {
+    throw new Error(error.message || 'Failed to sign in with Google');
+  }
+};
+
+// Original desktop Facebook sign-in (using popup)
 export const signInWithFacebook = async (): Promise<UserProfile> => {
   try {
     const provider = new FacebookAuthProvider();
     const userCredential: UserCredential = await signInWithPopup(auth, provider);
     const user = userCredential.user;
     
-    // Check if user profile already exists
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    
-    if (!userDoc.exists()) {
-      // Create new user profile for Facebook Sign-In
-      const nameParts = user.displayName?.split(' ') || [];
-      const firstName = nameParts[0] || 'User';
-      const lastName = nameParts.slice(1).join(' ') || '';
-      
-      const userProfile: UserProfile = {
-        uid: user.uid,
-        email: user.email!,
-        firstName,
-        lastName,
-        country: '',
-        joinDate: serverTimestamp(),
-        subscription: 'free',
-        isAdmin: false,
-        purchasedContent: [],
-        avatarUrl: user.photoURL || undefined
-      };
-      
-      await setDoc(doc(db, 'users', user.uid), userProfile);
-      return userProfile;
-    } else {
-      // Return existing user profile
-      return userDoc.data() as UserProfile;
-    }
+    return await handleSocialAuthUser(user);
   } catch (error: any) {
     throw new Error(error.message || 'Failed to sign in with Facebook');
   }

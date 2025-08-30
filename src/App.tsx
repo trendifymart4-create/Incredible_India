@@ -4,7 +4,7 @@ import Navigation from './components/Navigation';
 import Hero from './components/Hero';
 import Destinations from './components/Destinations';
 import DestinationsGrid from './components/DestinationsGrid';
-import VRExperience from './components/VRExperience';
+import FixedVRExperience from './components/FixedVRExperience';
 import FeaturedVideo from './components/FeaturedVideo';
 import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
@@ -26,6 +26,7 @@ import { useAuth } from './context/AuthContext';
 import { signOutUser } from './api/auth';
 import { useTranslation } from './context/TranslationContext';
 import { useImagePreloader } from './hooks/useImagePreloader';
+import { notificationService } from './services/notificationService';
 
 // Import seeder for development (can be used from browser console)
 import './utils/destinationSeeder';
@@ -105,6 +106,33 @@ function App() {
     setShowPreloadScreen(false);
   };
 
+  // Request notification permission when user is authenticated
+  React.useEffect(() => {
+    if (currentUser && 'Notification' in window) {
+      const requestNotificationPermission = async () => {
+        try {
+          if (Notification.permission === 'default') {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+              console.log('Notification permission granted');
+              // Register device token for push notifications
+              await notificationService.registerDeviceToken(currentUser.uid, 'web');
+            } else {
+              console.log('Notification permission denied');
+            }
+          } else if (Notification.permission === 'granted') {
+            // Already have permission, register device token
+            await notificationService.registerDeviceToken(currentUser.uid, 'web');
+          }
+        } catch (error) {
+          console.error('Error requesting notification permission:', error);
+        }
+      };
+
+      requestNotificationPermission();
+    }
+  }, [currentUser]);
+
   // Show preload screen during initial loading
   if (showPreloadScreen && (isPreloading || !preloadComplete)) {
     return (
@@ -154,7 +182,7 @@ function App() {
 
         <Footer />
 
-        <VRExperience
+        <FixedVRExperience
           destination={selectedDestination}
           isOpen={isVRModalOpen}
           onClose={handleCloseVR}

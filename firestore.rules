@@ -8,104 +8,105 @@ service cloud.firestore {
     
     function isAdmin() {
       return isAuthenticated() && 
+             ('admin' in request.auth.token) && 
              request.auth.token.admin == true;
     }
     
     function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidUser() {
       return isAuthenticated() && 
-             request.auth.uid == userId;
+             request.auth.token.email_verified == true;
     }
-    
-    function isOwnerOrAdmin(userId) {
-      return isOwner(userId) || isAdmin();
-    }
-    
-    // Users collection
+
+    // Users collection - users can read/write their own profile, admins can read all
     match /users/{userId} {
-      // Users can read their own profile, admins can read all
-      allow read: if isOwnerOrAdmin(userId);
-      
-      // Users can create their own profile during signup
-      allow create: if isAuthenticated() && 
-                       request.auth.uid == userId &&
-                       request.resource.data.uid == userId;
-      
-      // Users can update their own profile, admins can update any
-      allow update: if isOwnerOrAdmin(userId);
-      
-      // Only admins can delete user accounts
-      allow delete: if isAdmin();
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated();
     }
-    
-    // Destinations collection
+
+    // Destinations collection - public read, admin write
     match /destinations/{destinationId} {
-      // Anyone can read active destinations
-      allow read: if resource.data.isActive == true || isAdmin();
-      
-      // Only admins can create, update, or delete destinations
-      allow create, update, delete: if isAdmin();
+      allow read: if true; // Public read access
+      allow write: if isAdmin();
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
     }
-    
-    // Videos collection
+
+    // Videos collection - public read, admin write
     match /videos/{videoId} {
-      // Anyone can read active videos
-      allow read: if resource.data.isActive == true || isAdmin() || resource.data.isActive == null;
-      
-      // Only admins can create, update, or delete videos
-      allow create, update, delete: if isAdmin();
+      allow read: if true; // Public read access
+      allow write: if isAdmin();
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
     }
-    
-    // Reviews collection
+
+    // Reviews collection - authenticated users can create, owners can edit
     match /reviews/{reviewId} {
-      // Anyone can read non-hidden reviews
-      allow read: if resource.data.isHidden == false || isAdmin();
-      
-      // Users can create reviews for themselves
-      allow create: if isAuthenticated() && 
-                       request.auth.uid == request.resource.data.userId;
-      
-      // Users can update their own reviews, admins can update any
-      allow update: if isOwnerOrAdmin(resource.data.userId);
-      
-      // Users can delete their own reviews, admins can delete any
-      allow delete: if isOwnerOrAdmin(resource.data.userId);
+      allow read: if true; // Public read access
+      allow create: if isAuthenticated();
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
     }
-    
-    // Transactions collection
-    match /transactions/{transactionId} {
-      // Users can read their own transactions, admins can read all
-      allow read: if isOwnerOrAdmin(resource.data.userId);
-      
-      // Only authenticated users can create transactions for themselves
-      allow create: if isAuthenticated() && 
-                       request.auth.uid == request.resource.data.userId;
-      
-      // Only admins can update transactions (for status changes)
-      allow update: if isAdmin();
-      
-      // Only admins can delete transactions
-      allow delete: if isAdmin();
+
+    // Favorites collection - users can manage their own favorites
+    match /favorites/{favoriteId} {
+      allow read, write: if isOwner(resource.data.userId);
+      allow create: if isAuthenticated();
     }
-    
-    // Configuration collection (for featured video, etc.)
-    match /config/{configId} {
-      // Anyone can read config
-      allow read: if true;
-      
-      // Only admins can update config
-      allow create, update, delete: if isAdmin();
+
+    // User favorites subcollection
+    match /users/{userId}/favorites/{favoriteId} {
+      allow read, write: if isOwner(userId);
     }
-    
-    // Analytics collection (for storing analytics data)
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+      allow create: if isAdmin();
+    }
+
+    // User notifications subcollection
+    match /users/{userId}/notifications/{notificationId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Analytics collection - admin only
     match /analytics/{analyticsId} {
-      // Only admins can read analytics
-      allow read: if isAdmin();
-      
-      // System can write analytics data
-      allow create, update: if true;
-      
-      // Only admins can delete analytics
-      allow delete: if isAdmin();
+      allow read, write: if isAdmin();
+    }
+
+    // Payment records - users can read their own, admins can read all
+    match /payments/{paymentId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+    }
+
+    // Device tokens for push notifications
+    match /deviceTokens/{tokenId} {
+      allow read, write: if isOwner(resource.data.userId);
+      allow create: if isAuthenticated();
+    }
+
+    // Admin-only collections
+    match /admin/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Featured content configuration
+    match /config/{configId} {
+      allow read: if true; // Public read access
+      allow write: if isAdmin();
+    }
+
+    // Default deny all other access
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

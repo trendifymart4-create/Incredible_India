@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
 import { SkeletonTestimonial } from './SkeletonLoader';
 import { getLatestReviews, Review } from '../api/reviews';
@@ -47,6 +48,8 @@ const Testimonials: React.FC = () => {
   const [users, setUsers] = useState<{ [key: string]: UserProfile }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   useEffect(() => {
     const fetchTestimonials = async () => {

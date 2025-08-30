@@ -1,0 +1,173 @@
+// Firestore Security Rules for Notification System
+// Add these rules to your existing firestore.rules file
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is admin
+    function isAdmin(uid) {
+      return exists(/databases/$(database)/documents/users/$(uid)) &&
+             get(/databases/$(database)/documents/users/$(uid)).data.isAdmin == true;
+    }
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check resource ownership
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Existing user collection rules (assuming they exist)
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin(request.auth.uid);
+      allow create: if isAuthenticated();
+    }
+    
+    // Existing destinations collection rules (assuming they exist)
+    match /destinations/{destinationId} {
+      allow read: if true; // Public read access
+      allow write: if isAdmin(request.auth.uid);
+    }
+    
+    // Existing videos collection rules (assuming they exist)
+    match /videos/{videoId} {
+      allow read: if true; // Public read access
+      allow write: if isAdmin(request.auth.uid);
+    }
+    
+    // NEW NOTIFICATION SYSTEM RULES
+    
+    // Notifications collection - Admin write, authenticated user read
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin(request.auth.uid);
+      allow delete: if isAdmin(request.auth.uid);
+      
+      // Ensure admin can only modify their own created notifications or is super admin
+      allow update: if isAdmin(request.auth.uid) && 
+                   (resource.data.adminId == request.auth.uid || 
+                    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin');
+    }
+    
+    // User notifications - User-specific access only
+    match /userNotifications/{userNotificationId} {
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      allow create: if isAdmin(request.auth.uid);
+      allow update: if isAuthenticated() && 
+                       resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && 
+                       resource.data.userId == request.auth.uid;
+      
+      // Validate data structure on write
+      allow create: if isAdmin(request.auth.uid) &&
+                       request.resource.data.keys().hasAll(['userId', 'notificationId', 'isRead', 'receivedAt', 'dismissed']);
+      
+      // Users can only update read status and dismiss notifications
+      allow update: if isAuthenticated() && 
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead', 'readAt', 'dismissed', 'dismissedAt', 'clickedAt']);
+    }
+    
+    // Device tokens - User-specific access only
+    match /deviceTokens/{tokenId} {
+      allow read, write: if isAuthenticated() && 
+                            resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+      allow list: if isAuthenticated() && 
+                     request.auth.uid in resource.data.userId;
+      
+      // Validate device token structure
+      allow create, update: if request.resource.data.keys().hasAll(['userId', 'token', 'platform', 'isActive', 'lastUsed', 'createdAt']) &&
+                               request.resource.data.platform in ['web', 'android', 'ios'] &&
+                               request.resource.data.userId == request.auth.uid;
+    }
+    
+    // VR Analytics - User write (own data), Admin read
+    match /vrAnalytics/{analyticsId} {
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid;
+      allow read: if isAdmin(request.auth.uid) || 
+                     (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow list: if isAdmin(request.auth.uid);
+      
+      // Validate VR analytics structure
+      allow create: if request.resource.data.keys().hasAll(['userId', 'destinationId', 'sessionId', 'metrics', 'interactions', 'createdAt']) &&
+                       request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Announcement templates - Admin only
+    match /notificationTemplates/{templateId} {
+      allow read, write: if isAdmin(request.auth.uid);
+      
+      // Validate template structure
+      allow create, update: if request.resource.data.keys().hasAll(['type', 'titleTemplate', 'messageTemplate', 'isActive', 'createdBy', 'createdAt']) &&
+                               request.resource.data.type in ['destination', 'vr_tour'] &&
+                               request.resource.data.createdBy == request.auth.uid;
+    }
+    
+    // Notification analytics - Admin read only
+    match /notificationAnalytics/{analyticsId} {
+      allow read: if isAdmin(request.auth.uid);
+      allow write: if false; // Analytics are generated by cloud functions
+    }
+    
+    // Push notification subscriptions - User-specific access
+    match /pushSubscriptions/{subscriptionId} {
+      allow read, write: if isAuthenticated() && 
+                            resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+                       
+      // Validate subscription structure
+      allow create, update: if request.resource.data.keys().hasAll(['userId', 'subscription', 'platform', 'createdAt']) &&
+                               request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Notification preferences - User-specific access
+    match /notificationPreferences/{userId} {
+      allow read, write: if isAuthenticated() && userId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Admin notification settings - Admin only
+    match /adminNotificationSettings/{settingId} {
+      allow read, write: if isAdmin(request.auth.uid);
+    }
+    
+    // Notification delivery logs - Admin read only
+    match /deliveryLogs/{logId} {
+      allow read: if isAdmin(request.auth.uid);
+      allow write: if false; // Logs are generated by cloud functions
+    }
+    
+    // ADDITIONAL SECURITY FUNCTIONS
+    
+    // Function to validate notification target audience
+    function isValidTargetAudience(audience, targetUserIds) {
+      return audience in ['all', 'premium', 'specific'] &&
+             (audience != 'specific' || targetUserIds is list);
+    }
+    
+    // Function to validate notification priority
+    function isValidPriority(priority) {
+      return priority in ['low', 'medium', 'high', 'urgent'];
+    }
+    
+    // Function to validate notification type
+    function isValidNotificationType(type) {
+      return type in ['destination', 'vr_tour', 'announcement', 'system'];
+    }
+    
+    // Function to validate notification category
+    function isValidNotificationCategory(category) {
+      return category in ['new_content', 'update', 'promotion', 'maintenance'];
+    }
+  }
+}

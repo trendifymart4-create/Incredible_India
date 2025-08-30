@@ -13,6 +13,7 @@ import MobileUserProfile from './components/mobile/MobileUserProfile';
 import MobileAuthModal from './components/mobile/MobileAuthModal';
 import MobileSearch from './components/mobile/MobileSearch';
 import MobileNotifications from './components/mobile/MobileNotifications';
+import MobileVRExperience from './components/mobile/MobileVRExperience';
 import { PullToRefreshEnhanced, ScrollProgressIndicator } from './components/mobile/ScrollAnimations';
 import { TouchGestureHandler } from './components/mobile/HapticFeedback';
 import { FloatingParticles, DynamicGradientBackground } from './components/mobile/ParallaxEffects';
@@ -43,6 +44,8 @@ const MobileApp: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [toastMessage, setToastMessage] = useState<{message: string, type: 'success' | 'error' | 'info'} | null>(null);
   const [showPWAPrompt, setShowPWAPrompt] = useState(false);
+  const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
+  const [showVRModal, setShowVRModal] = useState(false);
   
   // Check if device is mobile
   useEffect(() => {
@@ -130,8 +133,9 @@ const MobileApp: React.FC = () => {
   
   // Handle VR experience
   const handleVRExperience = (destination: Destination) => {
-    showToast(t('messages.vr_experience_starting'), 'success');
-    // Implementation would go here
+    setSelectedDestination(destination);
+    setShowVRModal(true);
+    showToast(`Starting VR experience for ${destination.name}`, 'info');
   };
   
   // If showing splash screen
@@ -262,6 +266,16 @@ const MobileApp: React.FC = () => {
           />
         )}
       </AnimatePresence>
+      
+      {/* VR Experience Modal */}
+      <MobileVRExperience
+        destination={selectedDestination}
+        isOpen={showVRModal}
+        onClose={() => {
+          setShowVRModal(false);
+          setSelectedDestination(null);
+        }}
+      />
       
       {/* Toast Notifications */}
       {toastMessage && (

@@ -16,6 +16,7 @@ import {
 import { Destination } from '../../api/destinations';
 import { subscribeToDestinations } from '../../api/destinations';
 import { useHaptics } from '../../hooks/useHaptics';
+import MobileVRExperience from './MobileVRExperience';
 
 const MobileDestinationDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +25,7 @@ const MobileDestinationDetails: React.FC = () => {
   const [destination, setDestination] = useState<Destination | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showVRModal, setShowVRModal] = useState(false);
 
   useEffect(() => {
     const unsubscribe = subscribeToDestinations(
@@ -68,7 +70,7 @@ const MobileDestinationDetails: React.FC = () => {
 
   const handleVRTour = () => {
     triggerHaptic('heavy');
-    // VR tour implementation would go here
+    setShowVRModal(true);
   };
 
   if (loading) {
@@ -253,6 +255,13 @@ const MobileDestinationDetails: React.FC = () => {
           <span>Book Your Visit</span>
         </motion.button>
       </div>
+
+      {/* VR Experience Modal */}
+      <MobileVRExperience
+        destination={destination}
+        isOpen={showVRModal}
+        onClose={() => setShowVRModal(false)}
+      />
     </div>
   );
 };

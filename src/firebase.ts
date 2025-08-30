@@ -5,6 +5,8 @@ import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+import { getMessaging, isSupported } from 'firebase/messaging';
+import { isMobileDevice } from './utils/deviceDetection';
 
 // Firebase configuration from environment variables
 const firebaseConfig = {
@@ -30,9 +32,38 @@ if (import.meta.env.VITE_RECAPTCHA_SITE_KEY) {
 
 // Initialize Firebase services
 export const auth = getAuth(app);
+
+// Configure auth settings
+auth.useDeviceLanguage();
+
+// Configure auth for mobile devices
+if (isMobileDevice()) {
+  // Enable persistence for mobile devices
+  auth.settings.appVerificationDisabledForTesting = false;
+}
+
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
+
+// Initialize Firebase Cloud Messaging (FCM)
+let messaging: any = null;
+
+// Check if messaging is supported and initialize
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  isSupported().then((supported) => {
+    if (supported) {
+      messaging = getMessaging(app);
+      console.log('Firebase Messaging initialized successfully');
+    } else {
+      console.log('Firebase Messaging is not supported in this browser');
+    }
+  }).catch((error) => {
+    console.error('Error checking Firebase Messaging support:', error);
+  });
+}
+
+export { messaging };
 
 // Connect to emulators in development, if enabled
 if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true') {

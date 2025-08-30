@@ -266,44 +266,213 @@ async function handleBackgroundSync() {
 
 // Push notifications
 self.addEventListener('push', (event) => {
-  const options = {
-    body: event.data ? event.data.text() : 'New notification from Incredible India',
+  console.log('🔔 Service Worker: Push event received:', event);
+  
+  let notificationData = {
+    title: 'Incredible India',
+    body: 'New notification from Incredible India',
     icon: '/icon-192x192.png',
     badge: '/badge-72x72.png',
-    vibrate: [100, 50, 100],
+    tag: 'default',
+    requireInteraction: false,
+    silent: false,
+    data: {}
+  };
+
+  // Parse push data if available
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      console.log('📨 Service Worker: Push data:', data);
+      
+      // Handle Firebase Cloud Messaging format
+      if (data.notification) {
+        notificationData.title = data.notification.title || notificationData.title;
+        notificationData.body = data.notification.body || notificationData.body;
+        notificationData.icon = data.notification.icon || notificationData.icon;
+        notificationData.tag = data.notification.tag || data.data?.notificationId || 'default';
+      }
+      
+      // Handle custom data
+      if (data.data) {
+        notificationData.data = data.data;
+        
+        // Set priority-based options
+        if (data.data.priority === 'urgent' || data.data.priority === 'high') {
+          notificationData.requireInteraction = true;
+          notificationData.tag = 'urgent-' + (data.data.notificationId || Date.now());
+        }
+        
+        if (data.data.priority === 'low') {
+          notificationData.silent = true;
+        }
+        
+        // Set notification type-specific icon
+        if (data.data.type === 'destination') {
+          notificationData.icon = '/icon-destination.png';
+        } else if (data.data.type === 'vr_tour') {
+          notificationData.icon = '/icon-vr.png';
+        }
+      }
+    } catch (error) {
+      console.error('❌ Service Worker: Error parsing push data:', error);
+      notificationData.body = event.data.text() || notificationData.body;
+    }
+  }
+
+  // Enhanced notification options
+  const options = {
+    body: notificationData.body,
+    icon: notificationData.icon,
+    badge: notificationData.badge,
+    tag: notificationData.tag,
+    requireInteraction: notificationData.requireInteraction,
+    silent: notificationData.silent,
+    vibrate: notificationData.silent ? [] : [100, 50, 100],
+    timestamp: Date.now(),
     data: {
       dateOfArrival: Date.now(),
-      primaryKey: 1
+      primaryKey: notificationData.tag,
+      ...notificationData.data
     },
-    actions: [
-      {
-        action: 'explore',
-        title: 'Explore',
-        icon: '/icon-explore.png'
-      },
-      {
-        action: 'close',
-        title: 'Close',
-        icon: '/icon-close.png'
-      }
-    ]
+    actions: getNotificationActions(notificationData.data)
   };
 
   event.waitUntil(
-    self.registration.showNotification('Incredible India', options)
+    self.registration.showNotification(notificationData.title, options)
+      .then(() => {
+        console.log('✅ Service Worker: Notification displayed successfully');
+        
+        // Store notification for offline handling
+        return caches.open('notifications-v1').then(cache => {
+          return cache.put(`/notification-${notificationData.tag}`, 
+            new Response(JSON.stringify({
+              ...notificationData,
+              timestamp: Date.now()
+            }))
+          );
+        });
+      })
+      .catch(error => {
+        console.error('❌ Service Worker: Error showing notification:', error);
+      })
   );
 });
 
-// Notification click handling
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-
-  if (event.action === 'explore') {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
+// Get notification actions based on type and data
+function getNotificationActions(data) {
+  const actions = [];
+  
+  if (data && data.actionUrl) {
+    let actionTitle = 'Open';
+    
+    switch (data.type) {
+      case 'destination':
+        actionTitle = 'View Destination';
+        break;
+      case 'vr_tour':
+        actionTitle = 'Start VR Tour';
+        break;
+      case 'announcement':
+        actionTitle = 'Learn More';
+        break;
+    }
+    
+    actions.push({
+      action: 'open',
+      title: actionTitle,
+      icon: '/icon-action.png'
+    });
   }
+  
+  actions.push({
+    action: 'dismiss',
+    title: 'Dismiss',
+    icon: '/icon-close.png'
+  });
+  
+  return actions;
+}
+
+// Enhanced notification click handling
+self.addEventListener('notificationclick', (event) => {
+  console.log('🖱️ Service Worker: Notification clicked:', event);
+  
+  event.notification.close();
+  
+  const notificationData = event.notification.data;
+  const action = event.action;
+  
+  console.log('📊 Service Worker: Notification action:', action, notificationData);
+
+  let targetUrl = '/';
+  
+  if (action === 'open' || !action) {
+    // Determine target URL based on notification data
+    if (notificationData.actionUrl) {
+      targetUrl = notificationData.actionUrl;
+    } else if (notificationData.type === 'destination' && notificationData.relatedContentId) {
+      targetUrl = `/destinations/${notificationData.relatedContentId}`;
+    } else if (notificationData.type === 'vr_tour' && notificationData.relatedContentId) {
+      targetUrl = `/vr-tours/${notificationData.relatedContentId}`;
+    }
+  } else if (action === 'dismiss') {
+    // Handle dismiss action - could send analytics
+    console.log('📊 Service Worker: Notification dismissed');
+    return;
+  }
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then(clientList => {
+        console.log('👥 Service Worker: Found clients:', clientList.length);
+        
+        // Try to focus existing window with the target URL
+        for (const client of clientList) {
+          if (client.url.includes(targetUrl.split('?')[0]) && 'focus' in client) {
+            console.log('🎯 Service Worker: Focusing existing client');
+            return client.focus();
+          }
+        }
+        
+        // Try to focus any existing window and navigate
+        if (clientList.length > 0 && 'navigate' in clientList[0]) {
+          console.log('🧭 Service Worker: Navigating existing client');
+          return clientList[0].focus().then(() => clientList[0].navigate(targetUrl));
+        }
+        
+        // Open new window
+        console.log('🆕 Service Worker: Opening new window');
+        return clients.openWindow(targetUrl);
+      })
+      .catch(error => {
+        console.error('❌ Service Worker: Error handling notification click:', error);
+      })
+  );
+
+  // Track notification interaction
+  trackNotificationInteraction({
+    notificationId: notificationData.notificationId || 'unknown',
+    action: action || 'click',
+    timestamp: Date.now()
+  });
 });
+
+// Track notification interactions for analytics
+function trackNotificationInteraction(data) {
+  try {
+    // Store interaction data for later sync
+    caches.open('analytics-v1').then(cache => {
+      cache.put(`/notification-interaction-${Date.now()}`, 
+        new Response(JSON.stringify(data))
+      );
+    });
+    
+    console.log('📊 Service Worker: Tracked notification interaction:', data);
+  } catch (error) {
+    console.error('❌ Service Worker: Error tracking interaction:', error);
+  }
+}
 
 // Message handling for communication with main thread
 self.addEventListener('message', (event) => {
