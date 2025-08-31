@@ -1,20 +1,20 @@
 {
   "project_info": {
-    "project_number": "123456789000",
-    "project_id": "your-firebase-project-id",
-    "storage_bucket": "your-firebase-project-id.appspot.com"
+    "project_number": "684013360789",
+    "project_id": "incredible-india-app",
+    "storage_bucket": "incredible-india-app.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123456789000:android:abcdefghijklmnopqrstuvwxyz",
+        "mobilesdk_app_id": "1:684013360789:android:bddf682db958e3f97f6d9c",
         "android_client_info": {
           "package_name": "com.incredibleindia.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "123456789000-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com",
+          "client_id": "684013360789-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.incredibleindia.app",
@@ -22,7 +22,7 @@
           }
         },
         {
-          "client_id": "123456789000-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com",
+          "client_id": "684013360789-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -35,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "123456789000-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com",
+              "client_id": "684013360789-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

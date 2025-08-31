@@ -14,23 +14,33 @@ import { mobileAuthUI, MobileAuthState } from './mobileAuthUI';
 // Capacitor plugin access for v7+
 // In Capacitor v7+, we access plugins through the global registry
 let NativeAuth: any = null;
+let isNativeAuthInitialized = false;
 
-// Try to access the NativeAuth plugin if we're in a native environment
+// Enhanced initialization with better error handling
 const initializeNativeAuth = async () => {
   try {
     // Check if we're in a Capacitor environment
     const isCapacitor = (window as any).Capacitor && (window as any).Capacitor.isNativePlatform && (window as any).Capacitor.isNativePlatform();
     
     if (isCapacitor) {
-      // In Capacitor v7+, plugins are accessed through the Plugins registry
+      // Wait for plugins to be ready
+      await (window as any).Capacitor.PluginsReady;
+      
+      // Access the NativeAuth plugin
       const plugins = (window as any).Capacitor.Plugins;
       if (plugins && plugins.NativeAuth) {
         NativeAuth = plugins.NativeAuth;
-        return;
+        isNativeAuthInitialized = true;
+        console.log('NativeAuth plugin initialized successfully');
+        return true;
+      } else {
+        console.warn('NativeAuth plugin not found');
+        return false;
       }
     }
   } catch (error) {
-    console.log('Error initializing NativeAuth plugin', error);
+    console.error('Error initializing NativeAuth plugin:', error);
+    return false;
   }
 };
 
@@ -86,13 +96,13 @@ export class MobileGoogleAuth {
   async signIn(): Promise<UserProfile> {
     try {
       if (isMobileDevice()) {
-        // Use native authentication for Capacitor apps
-        if (typeof NativeAuth !== 'undefined') {
+        // Prioritize native authentication for Capacitor apps
+        if (typeof NativeAuth !== 'undefined' && NativeAuth !== null && isNativeAuthInitialized) {
           try {
             // Set UI state to authenticating
             mobileAuthUI.setState(MobileAuthState.AUTHENTICATING);
             
-            // Use native authentication
+            // Use native authentication as primary method
             const result = await NativeAuth.signInWithGoogle();
             
             // Convert native result to Firebase user object
@@ -107,7 +117,9 @@ export class MobileGoogleAuth {
             const profile = await handleSocialAuthUser(firebaseUser as any);
             return profile;
           } catch (nativeError) {
-            console.log('Native authentication failed, falling back to web redirect');
+            console.error('Native authentication failed:', nativeError);
+            // Only fall back to web redirect if native auth fails
+            mobileAuthUI.showError('Native authentication failed, using web authentication');
           }
         }
         
@@ -199,12 +211,12 @@ export class MobileFacebookAuth {
     try {
       if (isMobileDevice()) {
         // Use native authentication for Capacitor apps
-        if (typeof NativeAuth !== 'undefined') {
+        if (typeof NativeAuth !== 'undefined' && NativeAuth !== null && isNativeAuthInitialized) {
           try {
             // Set UI state to authenticating
             mobileAuthUI.setState(MobileAuthState.AUTHENTICATING);
             
-            // Use native authentication
+            // Use native authentication as primary method
             const result = await NativeAuth.signInWithFacebook();
             
             // Convert native result to Firebase user object
@@ -219,7 +231,9 @@ export class MobileFacebookAuth {
             const profile = await handleSocialAuthUser(firebaseUser as any);
             return profile;
           } catch (nativeError) {
-            console.log('Native authentication failed, falling back to web redirect');
+            console.error('Native authentication failed:', nativeError);
+            // Only fall back to web redirect if native auth fails
+            mobileAuthUI.showError('Native authentication failed, using web authentication');
           }
         }
         

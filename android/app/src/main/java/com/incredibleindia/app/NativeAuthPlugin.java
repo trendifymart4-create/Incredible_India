@@ -43,19 +43,33 @@ public class NativeAuthPlugin extends Plugin {
     public void load() {
         firebaseAuth = FirebaseAuth.getInstance();
         
-        // Configure Google Sign-In
-        // IMPORTANT: Replace "YOUR_WEB_CLIENT_ID" with your actual Web Client ID from Firebase
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("YOUR_WEB_CLIENT_ID")
-                .requestEmail()
-                .build();
-        
-        googleSignInClient = GoogleSignIn.getClient(this.getActivity(), gso);
+        try {
+            // Configure Google Sign-In with proper Web Client ID
+            String webClientId = "684013360789-bm40qnps10c4ngi5fivu4paa9k4vc8k6.apps.googleusercontent.com"; // Should be properly configured
+            
+            // Check if we have a valid web client ID
+            if (webClientId != null && !webClientId.equals("YOUR_ACTUAL_WEB_CLIENT_ID")) {
+                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(webClientId)
+                        .requestEmail()
+                        .build();
+                
+                googleSignInClient = GoogleSignIn.getClient(this.getActivity(), gso);
+            } else {
+                Log.e(TAG, "Invalid Web Client ID. Please configure in NativeAuthPlugin.");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error configuring Google Sign-In: " + e.getMessage());
+        }
         
         // Initialize Facebook SDK
-        FacebookSdk.sdkInitialize(this.getContext());
-        AppEventsLogger.activateApp(this.getContext());
-        callbackManager = CallbackManager.Factory.create();
+        try {
+            FacebookSdk.sdkInitialize(this.getContext());
+            AppEventsLogger.activateApp(this.getActivity().getApplication());
+            callbackManager = CallbackManager.Factory.create();
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing Facebook SDK: " + e.getMessage());
+        }
     }
     
     @PluginMethod

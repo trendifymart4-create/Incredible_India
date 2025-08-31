@@ -23,16 +23,21 @@ export const isMobileDevice = (): boolean => {
   // Check for touch capability
   const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   
+  // Check if we're in a Capacitor environment
+  const isCapacitor = (window as any).Capacitor && (window as any).Capacitor.isNativePlatform && (window as any).Capacitor.isNativePlatform();
+  
   // Return true if any mobile indicators are present
-  return isMobileUA || (isSmallScreen && hasTouch);
+  return isMobileUA || (isSmallScreen && hasTouch) || isCapacitor;
 };
 
 export const isIOS = (): boolean => {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+         ((window as any).Capacitor && (window as any).Capacitor.getPlatform && (window as any).Capacitor.getPlatform() === 'ios');
 };
 
 export const isAndroid = (): boolean => {
-  return /Android/.test(navigator.userAgent);
+  return /Android/.test(navigator.userAgent) || 
+         ((window as any).Capacitor && (window as any).Capacitor.getPlatform && (window as any).Capacitor.getPlatform() === 'android');
 };
 
 export const getDeviceType = (): 'mobile' | 'tablet' | 'desktop' => {
@@ -53,10 +58,26 @@ export const isStandalone = (): boolean => {
          (window.navigator as any).standalone === true;
 };
 
+// Check if we're in a Capacitor native environment
+export const isCapacitorNative = (): boolean => {
+  try {
+    return (window as any).Capacitor?.isNativePlatform() === true;
+  } catch (error) {
+    return false;
+  }
+};
+
+// Check if native authentication is supported
+export const isNativeAuthSupported = (): boolean => {
+  return isCapacitorNative() && (isIOS() || isAndroid());
+};
+
 export default {
   isMobileDevice,
   isIOS,
   isAndroid,
   getDeviceType,
-  isStandalone
+  isStandalone,
+  isCapacitorNative,
+  isNativeAuthSupported
 };
