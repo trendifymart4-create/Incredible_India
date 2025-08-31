@@ -271,7 +271,7 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
                           onClick={() => changeVideo(index)}
                           className={`w-3 h-3 rounded-full transition-all duration-200 ${
                             index === currentVideoIndex
-                              ? 'bg-red-500 scale-125'
+                              ? 'bg-red-600 scale-125'
                               : 'bg-white/50 hover:bg-white/70'
                           }`}
                         />
@@ -282,7 +282,7 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
                   {/* Fullscreen Toggle */}
                   <button
                     onClick={toggleFullscreen}
-                    className="absolute top-4 left-4 z-40 p-2 bg-black/50 hover:bg-black/70 rounded-lg transition-colors"
+                    className="absolute top-4 right-4 z-40 p-2 bg-black/50 hover:bg-black/70 rounded-lg transition-colors"
                   >
                     {isFullscreenMode ? (
                       <Minimize className="w-5 h-5 text-white" />
@@ -301,7 +301,7 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
                         exit={{ opacity: 0 }}
                       >
                         <div className="text-center text-white max-w-md px-6">
-                          <Lock className="w-16 h-16 mx-auto mb-4 text-red-500" />
+                          <Lock className="w-16 h-16 mx-auto mb-4 text-red-600" />
                           <h3 className="text-2xl font-bold mb-2">Unlock Full Experience</h3>
                           <p className="text-gray-300 mb-6 text-lg">
                             Continue exploring {destination.name} in stunning VR detail
@@ -340,22 +340,22 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
                   <div className="text-center">
                     {isVideoLoading ? (
                       <>
-                        <div className="w-16 h-16 border-4 border-white/20 border-t-red-500 rounded-full animate-spin mx-auto mb-4"></div>
+                        <div className="w-16 h-16 border-4 border-white/20 border-t-red-600 rounded-full animate-spin mx-auto mb-4"></div>
                         <p className="text-xl font-medium">Loading Experience...</p>
                         <p className="text-gray-400 mt-2">Preparing your VR journey</p>
                       </>
                     ) : videoError ? (
                       <>
-                        <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <X className="w-8 h-8 text-red-400" />
+                        <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <X className="w-8 h-8 text-red-500" />
                         </div>
-                        <p className="text-xl font-medium text-red-400">Failed to Load</p>
+                        <p className="text-xl font-medium text-red-500">Failed to Load</p>
                         <p className="text-gray-400 mt-2">Unable to load VR experience</p>
                       </>
                     ) : (
                       <>
-                        <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Play className="w-8 h-8 text-blue-400" />
+                        <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Play className="w-8 h-8 text-red-500" />
                         </div>
                         <p className="text-xl font-medium">No VR Experience Available</p>
                         <p className="text-gray-400 mt-2">Check back later for new content</p>
@@ -368,15 +368,15 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
 
             {/* Sidebar/Info Panel */}
             {!isFullscreenMode && (
-              <div className="w-full lg:w-1/3 xl:w-1/4 bg-gray-900 flex flex-col overflow-hidden">
+              <div className="w-full lg:w-1/3 xl:w-1/4 bg-white flex flex-col overflow-hidden">
                 
                 {/* Video Title & Stats */}
-                <div className="p-6 border-b border-gray-700">
-                  <h1 className="text-2xl font-bold text-white mb-2">
+                <div className="p-4 border-b border-gray-200">
+                  <h1 className="text-lg font-bold text-gray-900 mb-1">
                     {destination.name} VR Experience
                   </h1>
                   
-                  <div className="flex items-center space-x-4 text-gray-400 text-sm mb-4">
+                  <div className="flex items-center space-x-4 text-gray-500 text-sm mb-3">
                     <span>{formatNumber(viewCount + parseInt(destination.visitors.replace(/[^0-9]/g, '') || '0'))} views</span>
                     <div className="flex items-center space-x-1">
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
@@ -388,10 +388,10 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
                   <div className="flex items-center space-x-2 mb-4">
                     <button
                       onClick={toggleFavorite}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                      className={`flex items-center space-x-1 px-3 py-1.5 rounded-full text-sm transition-colors ${
                         isFavorited 
-                          ? 'bg-red-600 text-white' 
-                          : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                          ? 'bg-red-100 text-red-600' 
+                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                       }`}
                     >
                       <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
@@ -400,7 +400,7 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
                     
                     <button
                       onClick={handleShare}
-                      className="flex items-center space-x-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors"
+                      className="flex items-center space-x-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm transition-colors"
                     >
                       <Share2 className="w-4 h-4" />
                       <span>Share</span>
@@ -408,7 +408,7 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
                     
                     <button
                       onClick={() => setShowMoreOptions(!showMoreOptions)}
-                      className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors"
+                      className="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors"
                     >
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
@@ -416,65 +416,74 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
 
                   {/* Current Video Info */}
                   {hasVideos && currentVideo && (
-                    <div className="p-3 bg-gray-800 rounded-lg">
-                      <h3 className="font-semibold text-white text-sm mb-1">Now Playing</h3>
-                      <p className="text-gray-300 text-sm">{currentVideo.title}</p>
-                      <p className="text-gray-400 text-xs mt-1">{currentVideo.duration}</p>
+                    <div className="p-3 bg-gray-50 rounded-lg mb-3">
+                      <h3 className="font-semibold text-gray-900 text-sm mb-1">Now Playing</h3>
+                      <p className="text-gray-700 text-sm">{currentVideo.title}</p>
+                      <p className="text-gray-500 text-xs mt-1">{currentVideo.duration}</p>
                     </div>
                   )}
                 </div>
 
                 {/* Content Scrollable Area */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto bg-gray-50">
                   
                   {/* Description */}
-                  <div className="p-6 border-b border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-3">About This Experience</h3>
-                    <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                  <div className="p-4 border-b border-gray-200 bg-white">
+                    <h3 className="text-base font-semibold text-gray-900 mb-2">About This Experience</h3>
+                    <p className="text-gray-700 text-sm leading-relaxed mb-3">
                       {destination.description}
                     </p>
                     
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <div className="flex items-center space-x-3 text-sm">
-                        <Clock className="w-4 h-4 text-gray-400" />
-                        <span className="text-gray-300">Duration: {destination.duration}</span>
+                        <Clock className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-700">Duration: {destination.duration}</span>
                       </div>
                       <div className="flex items-center space-x-3 text-sm">
-                        <Shield className="w-4 h-4 text-green-400" />
-                        <span className="text-gray-300">Protected Content</span>
+                        <Shield className="w-4 h-4 text-green-500" />
+                        <span className="text-gray-700">Protected Content</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Video Playlist */}
                   {hasVideos && videos.length > 1 && (
-                    <div className="p-6 border-b border-gray-700">
-                      <h3 className="text-lg font-semibold text-white mb-4">Video Playlist</h3>
-                      <div className="space-y-3">
+                    <div className="p-4 border-b border-gray-200 bg-white">
+                      <h3 className="text-base font-semibold text-gray-900 mb-3">Video Playlist</h3>
+                      <div className="space-y-2">
                         {videos.map((video, index) => (
                           <button
                             key={video.id}
                             onClick={() => changeVideo(index)}
-                            className={`w-full text-left p-3 rounded-lg transition-all ${
+                            className={`w-full text-left p-2 rounded-lg transition-all ${
                               index === currentVideoIndex
-                                ? 'bg-red-600/20 border border-red-500/30'
-                                : 'bg-gray-800 hover:bg-gray-700'
+                                ? 'bg-red-50 border border-red-200'
+                                : 'hover:bg-gray-100'
                             }`}
                           >
                             <div className="flex items-start space-x-3">
-                              <div className="flex-shrink-0">
-                                <div className={`w-2 h-2 rounded-full mt-2 ${
-                                  index === currentVideoIndex ? 'bg-red-500' : 'bg-gray-500'
-                                }`} />
+                              <div className="flex-shrink-0 relative">
+                                <div className="w-16 h-9 bg-gray-200 rounded flex items-center justify-center">
+                                  {index === currentVideoIndex ? (
+                                    <Play className="w-3 h-3 text-red-600 ml-0.5" />
+                                  ) : (
+                                    <div className={`w-2 h-2 rounded-full mt-1 ${
+                                      index === currentVideoIndex ? 'bg-red-600' : 'bg-gray-400'
+                                    }`} />
+                                  )}
+                                </div>
+                                <div className="absolute bottom-0 right-0 bg-black/80 text-white text-xs px-1 rounded">
+                                  {video.duration}
+                                </div>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className={`font-medium text-sm ${
-                                  index === currentVideoIndex ? 'text-red-400' : 'text-white'
+                                  index === currentVideoIndex ? 'text-red-600' : 'text-gray-900'
                                 }`}>
                                   {video.title}
                                 </p>
-                                <p className="text-gray-400 text-xs mt-1 truncate">
-                                  {video.duration} • {video.description.substring(0, 50)}...
+                                <p className="text-gray-500 text-xs mt-1 truncate">
+                                  {video.description.substring(0, 40)}...
                                 </p>
                               </div>
                             </div>
@@ -485,13 +494,13 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
                   )}
 
                   {/* Highlights */}
-                  <div className="p-6 border-b border-gray-700">
-                    <h3 className="text-lg font-semibold text-white mb-4">Experience Highlights</h3>
-                    <div className="space-y-3">
+                  <div className="p-4 border-b border-gray-200 bg-white">
+                    <h3 className="text-base font-semibold text-gray-900 mb-3">Experience Highlights</h3>
+                    <div className="space-y-2">
                       {destination.highlights.map((highlight, index) => (
                         <div key={index} className="flex items-center space-x-3">
                           <div className="w-2 h-2 bg-red-500 rounded-full flex-shrink-0" />
-                          <span className="text-gray-300 text-sm">{highlight}</span>
+                          <span className="text-gray-700 text-sm">{highlight}</span>
                         </div>
                       ))}
                     </div>
@@ -499,36 +508,36 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
 
                   {/* Premium Features */}
                   {!hasAccess && (
-                    <div className="p-6">
-                      <div className="bg-gradient-to-br from-red-900/30 to-orange-900/30 border border-red-500/20 rounded-lg p-4">
-                        <h3 className="text-lg font-semibold text-red-400 mb-3 flex items-center space-x-2">
-                          <Lock className="w-5 h-5" />
+                    <div className="p-4 bg-white">
+                      <div className="bg-gradient-to-br from-red-50 to-orange-50 border border-red-100 rounded-lg p-4">
+                        <h3 className="text-base font-semibold text-red-600 mb-3 flex items-center space-x-2">
+                          <Lock className="w-4 h-4" />
                           <span>Premium Features</span>
                         </h3>
-                        <ul className="space-y-2 text-sm text-gray-300">
+                        <ul className="space-y-2 text-sm text-gray-700">
                           <li className="flex items-center space-x-2">
-                            <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
                             <span>Full 360° immersive experience</span>
                           </li>
                           <li className="flex items-center space-x-2">
-                            <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
                             <span>High-resolution 4K quality</span>
                           </li>
                           <li className="flex items-center space-x-2">
-                            <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
                             <span>Interactive hotspots & navigation</span>
                           </li>
                           <li className="flex items-center space-x-2">
-                            <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
                             <span>Professional audio narration</span>
                           </li>
                           <li className="flex items-center space-x-2">
-                            <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
                             <span>Unlimited access to all content</span>
                           </li>
                           {hasVideos && (
                             <li className="flex items-center space-x-2">
-                              <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
+                              <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
                               <span>All {videos.length} exclusive videos</span>
                             </li>
                           )}
@@ -536,7 +545,7 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
                         
                         <button
                           onClick={() => setIsPaymentModalOpen(true)}
-                          className="w-full mt-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3 px-4 rounded-lg font-semibold transition-all transform hover:scale-105"
+                          className="w-full mt-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2.5 px-4 rounded-lg font-semibold transition-all transform hover:scale-[1.02]"
                         >
                           Upgrade Now - $4.99
                         </button>
@@ -546,16 +555,16 @@ const VRExperience: React.FC<VRExperienceProps> = ({ destination, isOpen, onClos
                 </div>
 
                 {/* Bottom Action Bar */}
-                <div className="p-4 border-t border-gray-700 bg-gray-800">
+                <div className="p-3 border-t border-gray-200 bg-white">
                   {hasAccess ? (
-                    <div className="flex items-center justify-center space-x-2 text-green-400">
-                      <Shield className="w-5 h-5" />
-                      <span className="font-semibold">Premium Member</span>
+                    <div className="flex items-center justify-center space-x-2 text-green-600">
+                      <Shield className="w-4 h-4" />
+                      <span className="font-semibold text-sm">Premium Member</span>
                     </div>
                   ) : (
                     <button
                       onClick={() => setIsPaymentModalOpen(true)}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-semibold transition-all"
+                      className="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-lg font-semibold transition-all text-sm"
                     >
                       Unlock Full Experience
                     </button>

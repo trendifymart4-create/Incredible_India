@@ -86,15 +86,23 @@ export class NotificationService {
     adminId: string
   ): Promise<string> {
     try {
-      const notification: Omit<Notification, 'id'> = {
+      // Prepare notification object, excluding targetUserIds if not needed
+      const notification: any = {
         ...notificationData,
         adminId,
         createdAt: serverTimestamp() as Timestamp,
-        expiresAt: notificationData.expiresAt 
+        expiresAt: notificationData.expiresAt
           ? Timestamp.fromDate(notificationData.expiresAt)
           : undefined,
         metadata: notificationData.metadata || {}
       };
+
+      // Only include targetUserIds if targeting specific users
+      if (notificationData.targetAudience === 'specific' && notificationData.targetUserIds && notificationData.targetUserIds.length > 0) {
+        notification.targetUserIds = notificationData.targetUserIds;
+      } else {
+        delete notification.targetUserIds;
+      }
 
       const docRef = await addDoc(collection(db, 'notifications'), notification);
       
@@ -443,7 +451,7 @@ export class NotificationService {
       category: announcement.category,
       priority: announcement.priority,
       targetAudience: announcement.targetAudience,
-      targetUserIds: announcement.targetUserIds,
+      targetUserIds: announcement.targetUserIds || [],
       expiresAt: announcement.expiresAt,
       metadata: announcement.metadata
     };

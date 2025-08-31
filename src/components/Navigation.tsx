@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Globe, ChevronDown, User, LogOut, Settings, Home, MapPin, Eye, Info, Phone, Bell, Search, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useFavorites } from '../context/FavoritesContext'; // Add this import
 import { notificationService } from '../services/notificationService';
 import DesktopNotifications from './DesktopNotifications';
 
@@ -27,6 +28,7 @@ const Navigation: React.FC<NavigationProps> = ({
 }) => {
  const location = useLocation();
  const { currentUser: authUser } = useAuth();
+ const { favorites } = useFavorites(); // Add this hook
   
   console.log('Navigation: component rendered', {
     currentLanguage,
@@ -116,6 +118,14 @@ const Navigation: React.FC<NavigationProps> = ({
   // Handle notification click
   const handleNotificationClick = () => {
     setShowNotifications(!showNotifications);
+  };
+
+  // Handle favorites click - add this function
+  const handleFavoritesClick = () => {
+    // Navigate to user profile favorites tab or a dedicated favorites page
+    if (onShowProfile) {
+      onShowProfile();
+    }
   };
 
   return (
@@ -218,7 +228,8 @@ const Navigation: React.FC<NavigationProps> = ({
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`p-2 rounded-lg transition-all ${
+                  onClick={handleFavoritesClick} // Add click handler
+                  className={`relative p-2 rounded-lg transition-all ${
                     isScrolled 
                       ? 'text-gray-700 hover:bg-gray-100' 
                       : 'text-white hover:bg-white/10'
@@ -226,6 +237,15 @@ const Navigation: React.FC<NavigationProps> = ({
                   aria-label="Favorites"
                 >
                   <Heart className="w-5 h-5" />
+                  {favorites.length > 0 && ( // Show count badge
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold"
+                    >
+                      {favorites.length > 99 ? '99+' : favorites.length}
+                    </motion.span>
+                  )}
                 </motion.button>
               )}
               {/* Language Selector */}

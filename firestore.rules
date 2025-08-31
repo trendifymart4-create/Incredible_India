@@ -7,8 +7,8 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      return isAuthenticated() && 
-             ('admin' in request.auth.token) && 
+      return isAuthenticated() &&
+             ('admin' in request.auth.token) &&
              request.auth.token.admin == true;
     }
     
@@ -17,8 +17,15 @@ service cloud.firestore {
     }
     
     function isValidUser() {
-      return isAuthenticated() && 
+      return isAuthenticated() &&
              request.auth.token.email_verified == true;
+    }
+    
+    // Helper function to check if user is admin or super admin
+    function isAdminOrSuperAdmin() {
+      return isAdmin() || (isAuthenticated() &&
+             'role' in request.auth.token &&
+             request.auth.token.role == 'super_admin');
     }
 
     // Users collection - users can read/write their own profile, admins can read all
@@ -78,6 +85,38 @@ service cloud.firestore {
     // Analytics collection - admin only
     match /analytics/{analyticsId} {
       allow read, write: if isAdmin();
+    }
+    
+    // NEW NOTIFICATION SYSTEM RULES
+    
+    // Notifications collection - Admin write, authenticated user read
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAdminOrSuperAdmin();
+    }
+    
+    // User notifications - User-specific access only
+    match /userNotifications/{userNotificationId} {
+      allow read, update, delete: if isAuthenticated() &&
+                     resource.data.userId == request.auth.uid;
+      allow create: if isAdminOrSuperAdmin();
+    }
+    
+    // Device tokens - User-specific access only
+    match /deviceTokens/{tokenId} {
+      allow read, write: if isAuthenticated() &&
+                            resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+    }
+    
+    // VR Analytics - User write (own data), Admin read
+    match /vrAnalytics/{analyticsId} {
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+      allow read: if isAdminOrSuperAdmin() ||
+                     (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow list: if isAdminOrSuperAdmin();
     }
 
     // Payment records - users can read their own, admins can read all

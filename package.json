@@ -9,13 +9,20 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "seed:admin": "node seedAdmin.js",
-    "seed:destinations": "node seedDestinations.js"
+    "seed:destinations": "node seedDestinations.js",
+    "seed:contact": "node seedContactInquiries.js"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/app": "^7.0.2",
+    "@capacitor/cli": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/push-notifications": "^7.0.2",
     "@cashfreepayments/cashfree-js": "^1.0.5",
     "@react-spring/web": "^10.0.1",
     "@stripe/stripe-js": "^7.9.0",
     "@use-gesture/react": "^10.3.1",
+    "cloudinary": "^2.7.0",
     "date-fns": "^4.1.0",
     "firebase": "^12.1.0",
     "firebase-admin": "^13.4.0",

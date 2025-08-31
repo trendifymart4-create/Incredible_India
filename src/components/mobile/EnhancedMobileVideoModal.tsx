@@ -285,7 +285,7 @@ const EnhancedMobileVideoModal: React.FC<EnhancedMobileVideoModalProps> = ({
               <AnimatePresence>
                 {!hasAccess && previewTime > 0 && videoStarted && (
                   <motion.div
-                    className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm text-white px-3 py-2 rounded-lg z-50"
+                    className="absolute top-4 right-4 bg-red-600/90 backdrop-blur-sm text-white px-3 py-2 rounded-lg z-50"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
@@ -294,7 +294,7 @@ const EnhancedMobileVideoModal: React.FC<EnhancedMobileVideoModalProps> = ({
                       <Clock className="w-4 h-4" />
                       <span>Preview: {previewTime}s</span>
                       {isPaused && (
-                        <span className="text-orange-400 text-xs">(Paused)</span>
+                        <span className="text-orange-200 text-xs">(Paused)</span>
                       )}
                     </p>
                   </motion.div>
@@ -316,7 +316,7 @@ const EnhancedMobileVideoModal: React.FC<EnhancedMobileVideoModalProps> = ({
                         onClick={() => changeVideo(index)}
                         className={`w-3 h-3 rounded-full transition-all mobile-btn haptic-light ${
                           index === currentVideoIndex
-                            ? 'bg-orange-500'
+                            ? 'bg-red-600'
                             : 'bg-white/50 hover:bg-white/70'
                         }`}
                       />
@@ -335,14 +335,14 @@ const EnhancedMobileVideoModal: React.FC<EnhancedMobileVideoModalProps> = ({
                     exit={{ opacity: 0 }}
                   >
                     <div className="text-center text-white max-w-sm px-6">
-                      <Lock className="w-16 h-16 mx-auto mb-4 text-orange-400" />
+                      <Lock className="w-16 h-16 mx-auto mb-4 text-red-500" />
                       <h3 className="text-xl font-bold mb-2">Unlock Full Experience</h3>
                       <p className="text-gray-300 mb-6">
                         Continue exploring {destination.name} in stunning detail
                       </p>
                       <button
                         onClick={() => setIsPaymentModalOpen(true)}
-                        className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition-all w-full mobile-btn haptic-medium"
+                        className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg font-semibold transition-all w-full mobile-btn haptic-medium"
                       >
                         Unlock for $4.99
                       </button>
@@ -357,13 +357,13 @@ const EnhancedMobileVideoModal: React.FC<EnhancedMobileVideoModalProps> = ({
               <div className="text-center text-white">
                 {isLoading ? (
                   <>
-                    <div className="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+                    <div className="w-12 h-12 border-4 border-white/30 border-t-red-500 rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-lg font-medium">Loading Videos...</p>
                   </>
                 ) : (
                   <>
-                    <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Play className="w-8 h-8 text-blue-400" />
+                    <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Play className="w-8 h-8 text-red-400" />
                     </div>
                     <p className="text-lg font-medium">No VR Experience Available</p>
                   </>
@@ -385,13 +385,13 @@ const EnhancedMobileVideoModal: React.FC<EnhancedMobileVideoModalProps> = ({
             }}
           >
             <div className="p-4">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{currentVideo.title}</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">{currentVideo.title}</h3>
               <p className="text-sm text-gray-600 mb-3 line-clamp-2">{currentVideo.description}</p>
               
               {/* Video List */}
               {videos.length > 1 && (
-                <div className="space-y-2 mb-4">
-                  <h4 className="font-medium text-gray-900">More Videos</h4>
+                <div className="space-y-3 mb-4">
+                  <h4 className="font-medium text-gray-900 text-sm">More Videos</h4>
                   <div className="flex space-x-2 overflow-x-auto pb-2 scroll-smooth">
                     {videos.map((video, index) => (
                       <button
@@ -399,7 +399,7 @@ const EnhancedMobileVideoModal: React.FC<EnhancedMobileVideoModalProps> = ({
                         onClick={() => changeVideo(index)}
                         className={`flex-shrink-0 p-2 rounded-lg transition-all text-left min-w-32 mobile-btn haptic-light ${
                           index === currentVideoIndex
-                            ? 'bg-orange-100 border border-orange-200'
+                            ? 'bg-red-50 border border-red-200'
                             : 'bg-gray-100 hover:bg-gray-200'
                         }`}
                       >
@@ -416,7 +416,7 @@ const EnhancedMobileVideoModal: React.FC<EnhancedMobileVideoModalProps> = ({
                 {!hasAccess ? (
                   <button
                     onClick={() => setIsPaymentModalOpen(true)}
-                    className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white py-2 px-4 rounded-lg font-semibold transition-all text-sm mobile-btn haptic-medium"
+                    className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 px-4 rounded-lg font-semibold transition-all text-sm mobile-btn haptic-medium"
                   >
                     Unlock - $4.99
                   </button>

@@ -10,6 +10,8 @@ import {
 } from 'firebase/storage';
 import { storage } from '../firebase';
 
+// Configure Cloudinary with credentials from environment variables
+
 export interface UploadProgress {
   bytesTransferred: number;
   totalBytes: number;
@@ -257,3 +259,83 @@ export const resizeImage = (
     img.src = URL.createObjectURL(file);
   });
 };
+
+// Upload destination image to Cloudinary using direct API call
+export const uploadDestinationImageToCloudinary = async (
+  file: File,
+  destinationId: string
+): Promise<{ url: string; publicId: string; format: string; width: number; height: number }> => {
+  try {
+    // Get credentials from environment variables
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET; // You'll need to create an unsigned upload preset in Cloudinary
+    
+    if (!cloudName || !uploadPreset) {
+      throw new Error('Cloudinary configuration missing. Please check your environment variables.');
+    }
+    
+    // Create FormData for the upload
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+    formData.append('folder', `destinations/${destinationId}`);
+    
+    // Upload to Cloudinary using direct API call
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Cloudinary upload failed with status ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    return {
+      url: result.secure_url,
+      publicId: result.public_id,
+      format: result.format,
+      width: result.width,
+      height: result.height
+    };
+  } catch (error) {
+    console.error('Error uploading to Cloudinary:', error);
+    throw new Error(`Failed to upload image to Cloudinary: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+// Delete destination image from Cloudinary using direct API call
+export const deleteDestinationImageFromCloudinary = async (publicId: string): Promise<void> => {
+  try {
+    // Get credentials from environment variables
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const apiKey = import.meta.env.VITE_CLOUDINARY_API_KEY;
+    const apiSecret = import.meta.env.CLOUDINARY_API_SECRET;
+    
+    if (!cloudName || !apiKey || !apiSecret) {
+      throw new Error('Cloudinary configuration missing. Please check your environment variables.');
+    }
+    
+    // For browser security, deletion should be handled server-side
+    // This is a placeholder that shows the concept
+    console.warn('Direct deletion from browser is not recommended for security reasons.');
+    console.warn('In a production environment, this should be handled by your backend service.');
+    
+    // In a real implementation, you would call your backend service:
+    // await fetch('/api/delete-image', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ publicId })
+    // });
+    
+    // For now, we'll just log that deletion was requested
+    console.log(`Deletion requested for image with public ID: ${publicId}`);
+  } catch (error) {
+    console.error('Error deleting from Cloudinary:', error);
+    throw new Error(`Failed to delete image from Cloudinary: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+// Convert file to base64 (for Cloudinary upload)
+// Using the exported fileToBase64 function above

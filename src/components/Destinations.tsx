@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, Star, Play, Eye, Clock, Users, Loader2 } from 'lucide-react';
 import { useTranslation } from '../context/TranslationContext';
 import { subscribeToDestinations, Destination } from '../api/destinations';
+import fallbackDestinations from '../api/destinationsData';
 
 interface DestinationsProps {
   onVRExperience?: (destination: Destination) => void;
@@ -15,6 +16,7 @@ const Destinations: React.FC<DestinationsProps> = ({ onVRExperience }) => {
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUsingFallbackData, setIsUsingFallbackData] = useState(false);
 
   // Array of destination hero videos
   const videos = [
@@ -51,14 +53,35 @@ const Destinations: React.FC<DestinationsProps> = ({ onVRExperience }) => {
     const unsubscribe = subscribeToDestinations(
       (fetchedDestinations) => {
         console.log('✅ Destinations: Received destinations from Firebase:', fetchedDestinations.length);
+        // Check if we received fallback data (indicated by fallback IDs)
+        const isFallbackData = fetchedDestinations.length > 0 && fetchedDestinations[0].id.startsWith('fallback-');
+        
         setDestinations(fetchedDestinations);
         setLoading(false);
         setError(null);
+        
+        // If we're using fallback data, show a warning
+        if (isFallbackData) {
+          console.warn('Destinations: Using fallback data instead of Firebase data');
+          setIsUsingFallbackData(true);
+        }
       },
       (error) => {
         console.error('❌ Destinations: Firebase error:', error);
-        setError(error.message);
+        // Use fallback data directly when Firebase fails
+        const fallbackDataWithIds = fallbackDestinations.map((dest, index) => ({
+          ...dest,
+          id: `fallback-${index}`,
+          createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 } as any,
+          updatedAt: { seconds: Date.now() / 1000, nanoseconds: 0 } as any,
+          createdBy: 'fallback-system',
+          isActive: true
+        }));
+        
+        setDestinations(fallbackDataWithIds);
+        setIsUsingFallbackData(true);
         setLoading(false);
+        setError(null);
       }
     );
 
@@ -277,6 +300,25 @@ const Destinations: React.FC<DestinationsProps> = ({ onVRExperience }) => {
           {/* Destinations Grid */}
           {!loading && !error && (
             <>
+              {/* Fallback Data Warning */}
+              {isUsingFallbackData && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-8 max-w-2xl mx-auto">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-yellow-800">Using Demo Data</h3>
+                      <div className="mt-2 text-sm text-yellow-700">
+                        <p>Unable to connect to the database. Showing demo destinations. In a production environment, this would show real data from Firebase.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {destinations.map((destination) => (
                   <div

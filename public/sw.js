@@ -25,7 +25,7 @@ const CACHE_STRATEGIES = {
   // Network first for API calls
   networkFirst: [
     /\/api\//,
-    /\/destinations/,
+    /\/destinations\//,
     /firebase/
   ],
   

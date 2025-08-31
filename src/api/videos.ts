@@ -55,6 +55,7 @@ export interface FeaturedVideoConfig {
   embedCode?: string;
   title?: string;
   description?: string;
+  youtubeUrl?: string;
   isEnabled: boolean;
   updatedAt: Timestamp;
   updatedBy: string;

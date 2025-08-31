@@ -382,25 +382,27 @@ export interface PaymentGatewayConfig {
     keyId: string;
     keySecret: string;
     isActive: boolean;
+    enabled?: boolean;  // Add this property for backward compatibility
   };
   cashfree?: {
     clientId: string;
     clientSecret: string;
     isActive: boolean;
+    enabled?: boolean;  // Add this property for backward compatibility
   };
   paytm?: {
     merchantId: string;
     merchantKey: string;
     isActive: boolean;
+    enabled?: boolean;  // Add this property for backward compatibility
   };
   stripe?: {
     publishableKey: string;
     secretKey: string;
     webhookSecret: string;
     isActive: boolean;
+    enabled?: boolean;  // Add this property for backward compatibility
   };
-  updatedAt?: Timestamp;
-  updatedBy?: string;
 }
 
 // Get payment gateway configuration

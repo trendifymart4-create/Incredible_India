@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Camera, Star, Filter, Search, Grid, List } from 'lucide-react';
 import { Destination } from '../../api/destinations';
 import { useHaptics } from '../../hooks/useHaptics';
+import fallbackDestinations from '../../api/destinationsData';
 
 interface MobileDestinationsProps {
   destinations: Destination[];
@@ -24,10 +25,10 @@ const MobileDestinations: React.FC<MobileDestinationsProps> = ({
 
   const filteredDestinations = destinations.filter(dest => {
     const matchesSearch = dest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         dest.state.toLowerCase().includes(searchTerm.toLowerCase());
+                         dest.location.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (selectedFilter === 'all') return matchesSearch;
-    return matchesSearch && dest.category === selectedFilter;
+    return matchesSearch;
   });
 
   const handleDestinationTap = (destination: Destination) => {
@@ -159,7 +160,7 @@ const MobileDestinations: React.FC<MobileDestinationsProps> = ({
                   <div className="flex items-center justify-between text-xs text-gray-600">
                     <div className="flex items-center">
                       <MapPin size={12} className="mr-1" />
-                      {destination.state}
+                      {destination.location}
                     </div>
                     <div className="flex items-center">
                       <Star size={12} className="mr-1 text-yellow-400" />
@@ -197,7 +198,7 @@ const MobileDestinations: React.FC<MobileDestinationsProps> = ({
                         </h3>
                         <div className="flex items-center text-sm text-gray-600 mb-2">
                           <MapPin size={14} className="mr-1" />
-                          {destination.state}
+                          {destination.location}
                         </div>
                         <div className="flex items-center">
                           <Star size={14} className="mr-1 text-yellow-400" />

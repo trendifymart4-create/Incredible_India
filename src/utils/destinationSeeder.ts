@@ -9,7 +9,7 @@ const sampleDestinations = [
   {
     "name": "Taj Mahal",
     "location": "Agra, Uttar Pradesh",
-    "image": "https://images.pexels.com/photos/1583339/pexels-photo-15839.jpeg",
+    "image": "https://images.pexels.com/photos/1583339/pexels-photo-1583339.jpeg",
     "description": "An immense mausoleum of white marble, built in Agra between 1631 and 1648 by order of the Mughal emperor Shah Jahan in memory of his favourite wife.",
     "rating": 4.9,
     "duration": "2-3 hours",

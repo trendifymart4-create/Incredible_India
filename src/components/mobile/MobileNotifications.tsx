@@ -268,18 +268,16 @@ const MobileNotifications: React.FC<MobileNotificationsProps> = ({
                 </div>
               </div>
             ) : filteredNotifications.length === 0 ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="text-center text-gray-500">
-                  <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p className="text-lg font-medium mb-1">
-                    {filter === 'unread' ? 'No unread notifications' : 'No notifications'}
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    {filter === 'unread' 
-                      ? 'You\'re all caught up!' 
-                      : 'We\'ll notify you when something happens'}
-                  </p>
-                </div>
+              <div className="flex flex-col items-center justify-center py-12">
+                <Bell className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <h3 className="text-xl font-medium text-gray-700 mb-2">
+                  {filter === 'unread' ? 'No unread notifications' : 'No notifications'}
+                </h3>
+                <p className="text-gray-500 text-center max-w-xs px-4">
+                  {filter === 'unread' 
+                    ? 'You\'re all caught up! Check back later for new notifications.' 
+                    : 'You\'ll be notified when something important happens.'}
+                </p>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">

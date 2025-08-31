@@ -26,6 +26,7 @@ import { useAuth } from './context/AuthContext';
 import { useTranslation } from './context/TranslationContext';
 import { Destination } from './api/destinations';
 import { subscribeToDestinations } from './api/destinations';
+import fallbackDestinations from './api/destinationsData';
 
 const MobileApp: React.FC = () => {
   const location = useLocation();
@@ -84,9 +85,20 @@ const MobileApp: React.FC = () => {
         setError(null);
       },
       (error) => {
-        setError(error.message);
+        // Use fallback data when Firebase fails
+        const fallbackDataWithIds = fallbackDestinations.map((dest, index) => ({
+          ...dest,
+          id: `fallback-${index}`,
+          createdAt: { seconds: Date.now() / 1000, nanoseconds: 0 } as any,
+          updatedAt: { seconds: Date.now() / 1000, nanoseconds: 0 } as any,
+          createdBy: 'fallback-system',
+          isActive: true
+        }));
+        
+        setDestinations(fallbackDataWithIds);
         setLoading(false);
-        showToast(t('errors.destinations_load_failed'), 'error');
+        setError(null);
+        showToast(t('errors.destinations_load_failed_fallback'), 'info');
       }
     );
     
